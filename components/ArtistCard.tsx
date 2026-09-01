@@ -31,12 +31,55 @@ function initials(name: string): string {
 
 /**
  * Roster card for an artist who has played a Paracausal night.
- * Photo-led; falls back to an initials tile over the aura gradient when no
- * press shot has been sourced yet, so the grid never renders broken images.
+ *
+ * With a press shot the photo runs undimmed and the details reveal on hover,
+ * matching the event tiles. Without one the card keeps a visible detail panel
+ * under an initials tile — there is nothing to reveal behind a placeholder, and
+ * a card showing only two letters would be unreadable.
  */
 export default function ArtistCard({ artist }: { artist: Artist }) {
   const played = eventsForArtist(artist);
   const links = Object.entries(artist.links ?? {}).filter(([, href]) => Boolean(href));
+  const overlay = Boolean(artist.photo);
+
+  const details = (
+    <>
+      <h3
+        style={{
+          fontFamily: 'var(--font-techno)',
+          fontWeight: 700,
+          fontSize: 'clamp(1.05rem,2vw,1.35rem)',
+          color: '#fff',
+          textTransform: 'uppercase',
+          margin: 0,
+          lineHeight: 1.1,
+        }}
+      >
+        {artist.name}
+      </h3>
+
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: overlay ? 'center' : 'flex-start', gap: 8, flexWrap: 'wrap' }}>
+        <Tag color="violet" variant="outline" size="sm">{artist.genre}</Tag>
+        {artist.location && <span style={{ ...meta, letterSpacing: 'var(--ls-wide)', color: 'var(--text-faint)' }}>{artist.location}</span>}
+      </div>
+
+      {played.length > 0 && (
+        <p style={{ ...meta, fontSize: 'var(--fs-3xs)', color: 'var(--text-faint)', margin: 0, lineHeight: 1.6 }}>
+          {played.map((event) => event.title).join(' · ')}
+        </p>
+      )}
+
+      {links.length > 0 && (
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: overlay ? 'center' : 'flex-start', marginTop: 2, pointerEvents: 'auto' }}>
+          {links.map(([label, href]) => (
+            <a key={label} href={href} target="_blank" rel="noopener noreferrer" style={linkStyle}>
+              {label === 'ra' ? 'RA' : label}
+            </a>
+          ))}
+        </div>
+      )}
+    </>
+  );
 
   return (
     <div
@@ -58,7 +101,7 @@ export default function ArtistCard({ artist }: { artist: Artist }) {
             alt={artist.name}
             fill
             sizes="(max-width: 860px) 50vw, 240px"
-            style={{ objectFit: 'cover', opacity: 0.78 }}
+            style={{ objectFit: 'cover', opacity: 1 }}
           />
         ) : (
           <div
@@ -86,51 +129,29 @@ export default function ArtistCard({ artist }: { artist: Artist }) {
             </span>
           </div>
         )}
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            background: 'linear-gradient(180deg, rgba(5,6,10,0) 40%, rgba(5,6,10,0.92) 100%)',
-          }}
-        />
+        {overlay ? (
+          <>
+            <div className="rd-veil" />
+            <div className="rd-caption" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {details}
+            </div>
+          </>
+        ) : (
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(180deg, rgba(5,6,10,0) 40%, rgba(5,6,10,0.92) 100%)',
+            }}
+          />
+        )}
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: 18 }}>
-        <h3
-          style={{
-            fontFamily: 'var(--font-techno)',
-            fontWeight: 700,
-            fontSize: 'clamp(1.05rem,2vw,1.35rem)',
-            color: '#fff',
-            textTransform: 'uppercase',
-            margin: 0,
-            lineHeight: 1.1,
-          }}
-        >
-          {artist.name}
-        </h3>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-          <Tag color="violet" variant="outline" size="sm">{artist.genre}</Tag>
-          {artist.location && <span style={{ ...meta, letterSpacing: 'var(--ls-wide)', color: 'var(--text-faint)' }}>{artist.location}</span>}
+      {!overlay && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: 18 }}>
+          {details}
         </div>
-
-        {played.length > 0 && (
-          <p style={{ ...meta, fontSize: 'var(--fs-3xs)', color: 'var(--text-faint)', margin: 0, lineHeight: 1.6 }}>
-            {played.map((event) => event.title).join(' · ')}
-          </p>
-        )}
-
-        {links.length > 0 && (
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 2 }}>
-            {links.map(([label, href]) => (
-              <a key={label} href={href} target="_blank" rel="noopener noreferrer" style={linkStyle}>
-                {label === 'ra' ? 'RA' : label}
-              </a>
-            ))}
-          </div>
-        )}
-      </div>
+      )}
     </div>
   );
 }

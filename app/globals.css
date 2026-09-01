@@ -221,6 +221,44 @@ a:hover { color: var(--pc-cyan-bright); }
 .rd-card img, .rd-card video { transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1); }
 .rd-card:hover img, .rd-card:hover video { transform: scale(1.06); }
 
+/* Hover reveal — artwork sits undimmed until the pointer enters, then a scrim
+   darkens it and the caption fades up. Pinned open on touch (no hover). */
+.rd-veil {
+  position: absolute;
+  inset: 0;
+  /* Near-full scrim rather than a bottom fade: these tiles are wide and short
+     (16:9 banners), so the caption reaches high enough that a bottom-anchored
+     gradient leaves the title fighting the artwork's own printed type. */
+  background: linear-gradient(to top,
+              rgba(5, 6, 10, 0.94) 0%,
+              rgba(5, 6, 10, 0.86) 55%,
+              rgba(5, 6, 10, 0.68) 100%);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+.rd-card:hover .rd-veil { opacity: 1; }
+
+.rd-caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 22px;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.95);
+  pointer-events: none;
+}
+.rd-card:hover .rd-caption { opacity: 1; transform: translateY(0); }
+
+@media (hover: none) {
+  .rd-veil { opacity: 1; }
+  .rd-caption { opacity: 1; transform: none; }
+}
+
 /* Film grain finish */
 .rd-grain {
   position: fixed;
@@ -256,6 +294,8 @@ a:hover { color: var(--pc-cyan-bright); }
 
 @media (prefers-reduced-motion: reduce) {
   .rd-reveal { opacity: 1 !important; transform: none !important; }
+  .rd-caption { transform: none !important; transition: opacity 0.3s ease; }
+  .rd-card img, .rd-card video, .rd-card:hover img, .rd-card:hover video { transform: none !important; }
 }
 
 /* ── Redesign layout grids (collapse on narrow viewports) ── */
