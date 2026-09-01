@@ -1,203 +1,153 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import { usePathname } from 'next/navigation';
+import Button from '@/components/ds/Button';
+import { TICKETS_URL, navLinks } from '@/lib/site';
 
-const navLinks = [
-  { label: 'Home',        href: '/' },
-  { label: 'Tickets',     href: '/events' },
-  { label: 'Merchandise', href: '/merchandise' },
-  { label: 'Gallery',     href: '/gallery' },
-  { label: 'Contact',     href: '/contact' },
-];
+const linkStyle = {
+  cursor: 'pointer',
+  fontFamily: 'var(--font-mono)',
+  fontSize: 'var(--fs-xs)',
+  letterSpacing: 'var(--ls-wide)',
+  textTransform: 'uppercase',
+  textDecoration: 'none',
+} as const;
 
 export default function Navbar() {
-  const router = useRouter();
-  const [scrolled, setScrolled] = useState(false);
-  const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 60);
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
-  // Lock body scroll when mobile menu open
-  useEffect(() => {
-    document.body.style.overflow = open ? 'hidden' : '';
+    document.body.style.overflow = menuOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
-  }, [open]);
+  }, [menuOpen]);
 
-  const handleLink = (href: string) => {
-    setOpen(false);
-    setTimeout(() => router.push(href), 150);
-  };
+  const colorFor = (href: string) =>
+    pathname === href ? 'var(--pc-cyan)' : 'rgba(198,204,218,0.7)';
 
   return (
     <>
-      <motion.nav
-        initial={{ y: -80, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-        className={`fixed top-0 w-full z-50 transition-all duration-500 ${
-          scrolled || open
-            ? 'bg-[rgba(3,3,5,0.95)] backdrop-blur-xl border-b border-white/5'
-            : 'bg-transparent'
-        }`}
+      <nav
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          zIndex: 80,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 24,
+          height: 72,
+          padding: '0 clamp(20px,4vw,48px)',
+          background: '#000',
+          borderBottom: '1px solid var(--border)',
+        }}
       >
-        <div className="max-w-7xl mx-auto px-6 py-5 flex items-center">
+        <Link href="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
+          <Image src="/logo.png" alt="paracausal" width={155} height={26} priority style={{ height: 26, width: 'auto', objectFit: 'contain', display: 'block' }} />
+        </Link>
 
-          {/* Wordmark — left, all breakpoints */}
-          <a
-            href="/"
-            className="text-white hover:opacity-70 transition-opacity duration-300 flex-shrink-0"
-            style={{ fontFamily: "'Archivo Black', sans-serif", letterSpacing: '0.12em', fontSize: '1.05rem' }}
-          >
-            PARACAUSAL
-          </a>
-
-          {/* Desktop nav — centred absolutely so it doesn't shift with cart */}
-          <ul className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
-            {navLinks.map(link => (
-              <li key={link.label}>
-                <Link
-                  href={link.href}
-                  className="text-[11px] tracking-widest uppercase text-white/50 hover:text-white transition-colors duration-200"
-                >
-                  {link.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-
-          {/* Right side: hamburger (mobile only) */}
-          <div className="ml-auto flex items-center gap-4">
-
-            {/* Hamburger — mobile only */}
-            <button
-              onClick={() => setOpen(o => !o)}
-              className="flex md:hidden flex-col justify-center gap-[5px] w-8 h-8 group relative"
-              aria-label={open ? 'Close menu' : 'Open menu'}
-            >
-              <motion.span
-                animate={open ? { rotate: 45, y: 7 } : { rotate: 0, y: 0 }}
-                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                className="block h-px w-6 bg-white origin-center"
-              />
-              <motion.span
-                animate={open ? { opacity: 0, x: -8 } : { opacity: 1, x: 0 }}
-                transition={{ duration: 0.2 }}
-                className="block h-px w-6 bg-white"
-              />
-              <motion.span
-                animate={open ? { rotate: -45, y: -7 } : { rotate: 0, y: 0 }}
-                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                className="block h-px w-6 bg-white origin-center"
-              />
-            </button>
-          </div>
+        <div className="nav-links">
+          {navLinks.map((link) => (
+            <Link key={link.href} href={link.href} style={{ ...linkStyle, color: colorFor(link.href) }}>
+              {link.label}
+            </Link>
+          ))}
         </div>
-      </motion.nav>
 
-      {/* Full-screen mobile menu overlay */}
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            key="menu"
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-            className="fixed inset-0 z-40 flex flex-col md:hidden overflow-y-auto"
-            style={{ background: '#0a0a0c' }}
+        <div className="nav-cta" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <a href={TICKETS_URL} target="_blank" rel="noopener" style={{ textDecoration: 'none' }}>
+            <Button size="sm" variant="primary">Tickets</Button>
+          </a>
+        </div>
+
+        <button
+          onClick={() => setMenuOpen((o) => !o)}
+          className="nav-burger"
+          aria-label="Menu"
+          aria-expanded={menuOpen}
+          style={{
+            width: 40,
+            height: 40,
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: 'transparent',
+            border: '1px solid var(--border-strong)',
+            borderRadius: 'var(--r-sm)',
+            color: '#fff',
+            cursor: 'pointer',
+          }}
+        >
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.6">
+            <path d="M3 6h18M3 12h18M3 18h18" />
+          </svg>
+        </button>
+      </nav>
+
+      {menuOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 90,
+            background: '#08090D',
+            padding: '96px 32px 40px',
+            display: 'flex',
+            flexDirection: 'column',
+            overflowY: 'auto',
+          }}
+        >
+          <button
+            onClick={() => setMenuOpen(false)}
+            aria-label="Close menu"
+            style={{
+              position: 'absolute',
+              top: 20,
+              right: 24,
+              width: 40,
+              height: 40,
+              background: 'transparent',
+              border: '1px solid var(--border-strong)',
+              borderRadius: 'var(--r-sm)',
+              color: '#fff',
+              cursor: 'pointer',
+            }}
           >
-            {/* Subtle top accent line */}
-            <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(to right, transparent, rgba(74,56,150,0.6), transparent)' }} />
+            ✕
+          </button>
 
-            <div className="flex flex-col min-h-full px-8 pt-24 pb-10">
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--fs-2xs)', letterSpacing: 'var(--ls-widest)', color: 'var(--text-muted)', textTransform: 'uppercase', margin: '0 0 20px' }}>
+            Explore
+          </p>
 
-              {/* ── Navigation links ── */}
-              <nav className="flex-1">
-                <p className="text-[9px] tracking-[0.45em] text-white/25 uppercase mb-6">Explore</p>
-                <ul>
-                  {navLinks.map((link, i) => (
-                    <motion.li
-                      key={link.label}
-                      initial={{ opacity: 0, y: 12 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.3, delay: 0.05 + i * 0.05, ease: [0.22, 1, 0.36, 1] }}
-                      className="border-b"
-                      style={{ borderColor: 'rgba(255,255,255,0.06)' }}
-                    >
-                      <button
-                        onClick={() => handleLink(link.href)}
-                        className="group flex items-center justify-between w-full py-4 text-left"
-                      >
-                        <span
-                          className="text-[1.6rem] leading-none text-white/75 group-hover:text-white transition-colors duration-200"
-                          style={{ fontFamily: "'Archivo Black', sans-serif", letterSpacing: '0.02em' }}
-                        >
-                          {link.label}
-                        </span>
-                        <svg
-                          viewBox="0 0 16 16"
-                          className="w-3.5 h-3.5 text-white/20 group-hover:text-white/60 transition-colors duration-200 flex-shrink-0"
-                          fill="none" stroke="currentColor" strokeWidth="1.5"
-                        >
-                          <path d="M3 8h10M9 4l4 4-4 4" />
-                        </svg>
-                      </button>
-                    </motion.li>
-                  ))}
-                </ul>
-              </nav>
+          {navLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              onClick={() => setMenuOpen(false)}
+              style={{
+                fontFamily: 'var(--font-techno)',
+                fontWeight: 700,
+                fontSize: 32,
+                color: '#fff',
+                textTransform: 'uppercase',
+                padding: '14px 0',
+                borderBottom: '1px solid var(--border)',
+              }}
+            >
+              {link.label}
+            </Link>
+          ))}
 
-              {/* ── Bottom section ── */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.35 }}
-                className="mt-10 space-y-8"
-              >
-                {/* Socials */}
-                <div>
-                  <p className="text-[9px] tracking-[0.45em] text-white/25 uppercase mb-4">Connect</p>
-                  <div className="flex flex-col gap-2.5">
-                    {[
-                      { label: 'Instagram', href: 'https://instagram.com/paracausal' },
-                      { label: 'Facebook',  href: 'https://facebook.com/paracausal' },
-                    ].map(({ label, href }) => (
-                      <a
-                        key={label}
-                        href={href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={() => setOpen(false)}
-                        className="flex items-center justify-between group"
-                      >
-                        <span className="text-sm tracking-widest uppercase text-white/50 group-hover:text-white transition-colors duration-200">
-                          {label}
-                        </span>
-                        <svg viewBox="0 0 16 16" className="w-3 h-3 text-white/15 group-hover:text-white/50 transition-colors" fill="none" stroke="currentColor" strokeWidth="1.5">
-                          <path d="M3 3h10v10M3 13L13 3" />
-                        </svg>
-                      </a>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Location tag */}
-                <div className="pt-4 border-t" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
-                  <p className="text-[9px] tracking-[0.4em] text-white/20 uppercase">Cape Town, South Africa · Est. 2022</p>
-                </div>
-              </motion.div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          <a href={TICKETS_URL} target="_blank" rel="noopener" style={{ marginTop: 28, textDecoration: 'none' }}>
+            <Button size="lg" variant="primary" block>Get tickets</Button>
+          </a>
+        </div>
+      )}
     </>
   );
 }
