@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Tag from '@/components/ds/Tag';
-import type { PastEvent } from '@/lib/site';
+import { artistsForEvent, type PastEvent } from '@/lib/site';
 
 const meta = {
   fontFamily: 'var(--font-mono)',
@@ -16,6 +16,8 @@ const meta = {
  * the "Archive" corner stamp used on the events page.
  */
 export default function EventTile({ event, compact = false }: { event: PastEvent; compact?: boolean }) {
+  const lineup = compact ? [] : artistsForEvent(event.id);
+
   return (
     <div
       className="rd-card"
@@ -82,10 +84,17 @@ export default function EventTile({ event, compact = false }: { event: PastEvent
         {compact ? (
           <p style={{ ...meta, letterSpacing: 'var(--ls-wide)', color: 'var(--text-faint)', margin: '8px 0 0' }}>{event.venue}</p>
         ) : (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-            <Tag color="violet" variant="outline" size="sm">{event.genre}</Tag>
-            <span style={{ ...meta, letterSpacing: 'var(--ls-wide)', color: 'var(--text-faint)' }}>{event.venue}</span>
-          </div>
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+              <Tag color="violet" variant="outline" size="sm">{event.genre}</Tag>
+              <span style={{ ...meta, letterSpacing: 'var(--ls-wide)', color: 'var(--text-faint)' }}>{event.venue}</span>
+            </div>
+            {lineup.length > 0 && (
+              <p style={{ ...meta, fontSize: 'var(--fs-3xs)', color: 'var(--text-faint)', margin: '10px 0 0', lineHeight: 1.6 }}>
+                {lineup.map((artist) => artist.name).join(' · ')}
+              </p>
+            )}
+          </>
         )}
       </div>
     </div>
