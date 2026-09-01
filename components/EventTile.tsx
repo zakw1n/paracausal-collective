@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import Tag from '@/components/ds/Tag';
 import { artistsForEvent, type PastEvent } from '@/lib/site';
 
@@ -19,9 +20,12 @@ export default function EventTile({ event, compact = false }: { event: PastEvent
   const lineup = compact ? [] : artistsForEvent(event.id);
 
   return (
-    <div
+    <Link
+      href={`/events/${event.id}`}
       className="rd-card"
       style={{
+        display: 'block',
+        textDecoration: 'none',
         position: 'relative',
         aspectRatio: compact ? '16 / 10' : '16 / 9',
         overflow: 'hidden',
@@ -97,6 +101,6 @@ export default function EventTile({ event, compact = false }: { event: PastEvent
           </>
         )}
       </div>
-    </div>
+    </Link>
   );
 }
