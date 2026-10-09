@@ -286,6 +286,17 @@ a:hover { color: var(--pc-cyan-bright); }
   .pc-nav-item { transform: none; }
 }
 
+/* Blocked autoplay. Where the browser refuses to start background video (an
+   iPhone in Low Power Mode refuses all of it), Safari draws a play button over
+   the frame. These are decoration, not players, so the button is hidden and
+   the poster stands in until components/AutoplayNudge can start them. */
+.rd-hero-media video::-webkit-media-controls-start-playback-button,
+.rd-card video::-webkit-media-controls-start-playback-button,
+.rd-night-media::-webkit-media-controls-start-playback-button {
+  display: none !important;
+  -webkit-appearance: none;
+}
+
 /* ── Redesign layout grids (collapse on narrow viewports) ── */
 .rd-split       { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(30px, 5vw, 70px); align-items: center; }
 .rd-stats       { display: grid; grid-template-columns: repeat(4, 1fr); }
@@ -585,7 +596,20 @@ a:hover { color: var(--pc-cyan-bright); }
      line below keep a margin. Taller for its width than on a desktop, or the
      open flyer would be too small to read on a phone. */
   .rd-nights-head, .rd-nights-foot { padding-inline: 20px; }
-  .rd-nights { --night-h: 90cqw; }
+  /* As big as the open flyer can be with every panel still in view: the
+     closed ones are cut to slivers and the open one takes the rest of the
+     width, its height following at 9:16. Capped so a wide phone or a small
+     tablet does not get a flyer taller than its screen. */
+  .rd-nights {
+    --night-closed: 32px;
+    --night-h: min(
+      (100cqw - (var(--night-count, 4) - 1) * (var(--night-closed) + 6px)) * 16 / 9,
+      78svh
+    );
+  }
+  /* Pulled in to fit the slivers. */
+  .rd-night-num { top: 14px; left: 6px; letter-spacing: 0.1em; }
+  .rd-night-name { left: 4px; bottom: 16px; font-size: 18px; }
   .rd-nights-foot { font-size: 11px; letter-spacing: 0.14em; }
   /* No room for both halves of the line on one row. */
   .rd-nights-hint { display: none; }

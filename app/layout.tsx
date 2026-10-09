@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import AutoplayNudge from '@/components/AutoplayNudge';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import RevealObserver from '@/components/RevealObserver';
@@ -36,6 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SiteChrome>
           <div className="rd-grain" />
           <RevealObserver />
+          <AutoplayNudge />
           <Navbar />
         </SiteChrome>
         {children}

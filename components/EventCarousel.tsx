@@ -103,6 +103,8 @@ function Reel({ uid, active, muted }: { uid: string; active: boolean; muted: boo
     <video
       ref={ref}
       className="rd-night-media"
+      // Lets components/AutoplayNudge restart it if the browser refused play().
+      data-playing={active}
       poster={streamPoster(uid, 1280, POSTER_AT)}
       muted
       loop
@@ -164,7 +166,7 @@ export default function EventCarousel({ events }: { events: SiteEvent[] }) {
           className="rd-nights"
           // Sound holds the strip, or a reel would be cut off mid-listen.
           data-hold={sound && current.reel ? 'true' : undefined}
-          style={{ '--night-ms': `${ADVANCE_MS}ms` } as CSSProperties}
+          style={{ '--night-ms': `${ADVANCE_MS}ms`, '--night-count': events.length } as CSSProperties}
         >
           {events.map((event, i) => {
             const on = i === active;
