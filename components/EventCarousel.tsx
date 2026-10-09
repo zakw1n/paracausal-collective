@@ -26,7 +26,7 @@ const POSTER_AT = 12;
  *
  * See components/StreamVideo.tsx for why hls.js is tried before native HLS.
  */
-function Reel({ uid, active, muted }: { uid: string; active: boolean; muted: boolean }) {
+function Reel({ uid, active }: { uid: string; active: boolean }) {
   const ref = useRef<HTMLVideoElement>(null);
   const wanted = useRef(active);
 
@@ -36,8 +36,7 @@ function Reel({ uid, active, muted }: { uid: string; active: boolean; muted: boo
   if (active && !armed) setArmed(true);
 
   // Whether the reel is being shown as an image because the browser refused
-  // to autoplay it — see components/MotionImage. Turning the sound on is a
-  // tap, which lifts the refusal, so that goes back to the real video.
+  // to autoplay it — see components/MotionImage.
   const [stand, setStand] = useState(false);
   const refused = (error: unknown) => { if (autoplayRefused(error)) setStand(true); };
 
@@ -100,15 +99,6 @@ function Reel({ uid, active, muted }: { uid: string; active: boolean; muted: boo
     };
   }, []);
 
-  // React only writes `muted` as an attribute on mount, so later changes go
-  // through the property.
-  useEffect(() => {
-    const video = ref.current;
-    if (!video) return;
-    video.muted = muted;
-    if (!muted && wanted.current) video.play().then(() => setStand(false), () => {});
-  }, [muted]);
-
   return (
     <>
       <video
@@ -138,13 +128,12 @@ function Reel({ uid, active, muted }: { uid: string; active: boolean; muted: boo
  * The auto-advance has no timer of its own. The open panel's progress bar is a
  * CSS animation and the strip moves on when it ends, so the bar and the
  * advance cannot drift apart, and holding is a stylesheet rule (pointer over
- * the strip, keyboard focus inside it, or sound on — see .rd-nights in
+ * the strip or keyboard focus inside it — see .rd-nights in
  * globals.css). Under `prefers-reduced-motion` the animation is off, so
  * nothing advances.
  */
 export default function EventCarousel({ events }: { events: SiteEvent[] }) {
   const [active, setActive] = useState(0);
-  const [sound, setSound] = useState(false);
   const stripRef = useRef<HTMLDivElement>(null);
   /** Where a touch on the strip began, to tell a swipe from a tap or a scroll. */
   const touch = useRef<{ x: number; y: number } | null>(null);
@@ -174,7 +163,7 @@ export default function EventCarousel({ events }: { events: SiteEvent[] }) {
             <p style={{ ...eyebrow, margin: '0 0 14px' }}>The archive</p>
             <h2 style={sectionHeading}>RECENT NIGHTS</h2>
           </div>
-          <Link href="/events"><Button size="md" variant="secondary">All events</Button></Link>
+          <Link href="/events" className="rd-head-cta"><Button size="md" variant="secondary">All events</Button></Link>
         </div>
 
         <div
@@ -193,8 +182,6 @@ export default function EventCarousel({ events }: { events: SiteEvent[] }) {
             if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy)) return;
             setActive((n) => (n + (dx < 0 ? 1 : -1) + events.length) % events.length);
           }}
-          // Sound holds the strip, or a reel would be cut off mid-listen.
-          data-hold={sound && current.reel ? 'true' : undefined}
           style={{ '--night-ms': `${ADVANCE_MS}ms`, '--night-count': events.length } as CSSProperties}
         >
           {events.map((event, i) => {
@@ -225,7 +212,7 @@ export default function EventCarousel({ events }: { events: SiteEvent[] }) {
                   }}
                 >
                   {event.reel ? (
-                    <Reel uid={event.reel} active={on} muted={!sound} />
+                    <Reel uid={event.reel} active={on} />
                   ) : (
                     <Image src={event.banner} alt="" fill sizes="430px" className="rd-night-media" />
                   )}
@@ -236,18 +223,6 @@ export default function EventCarousel({ events }: { events: SiteEvent[] }) {
                   </span>
                 </Link>
 
-                {/* Beside the link, not inside it: a button cannot nest in an anchor. */}
-                {event.reel && on && (
-                  <button
-                    type="button"
-                    className="rd-night-sound"
-                    aria-pressed={sound}
-                    aria-label={sound ? 'Mute the reel' : 'Play the reel with sound'}
-                    onClick={() => setSound((s) => !s)}
-                  >
-                    ♪
-                  </button>
-                )}
               </div>
             );
           })}
@@ -256,6 +231,12 @@ export default function EventCarousel({ events }: { events: SiteEvent[] }) {
         <div className="rd-nights-foot">
           <span className="rd-nights-hint">Auto-cycles · hover to hold</span>
           <span>{`${String(active + 1).padStart(2, '0')} / ${current.title} · ${current.date}`}</span>
+        </div>
+
+        {/* On a phone the button sits under the strip, not in the heading —
+            see .rd-foot-cta in globals.css. */}
+        <div className="rd-foot-cta">
+          <Link href="/events"><Button size="md" variant="secondary">All events</Button></Link>
         </div>
       </div>
     </section>

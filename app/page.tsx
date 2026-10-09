@@ -104,9 +104,14 @@ export default function Home() {
                 MOMENTS FROM<br />THE DARK
               </h2>
             </div>
-            <Link href="/gallery"><Button size="md" variant="secondary">Enter the gallery</Button></Link>
+            <Link href="/gallery" className="rd-head-cta"><Button size="md" variant="secondary">Enter the gallery</Button></Link>
           </div>
         </GalleryStrip>
+        {/* On a phone the button sits under the tiles, not in the heading —
+            see .rd-foot-cta in globals.css. */}
+        <div className="rd-foot-cta">
+          <Link href="/gallery"><Button size="md" variant="secondary">Enter the gallery</Button></Link>
+        </div>
       </section>
 
       {/* ── RECENT NIGHTS ── */}

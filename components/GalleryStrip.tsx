@@ -16,7 +16,8 @@ const ROAM_MS = 2200;
  *
  * A cyan ring — the one the open poster wears in Recent Nights — wanders from
  * tile to tile at random. It gives way to the pointer (see `.rd-lit` in
- * globals.css) and stays put for visitors who prefer reduced motion.
+ * globals.css), stays put for visitors who prefer reduced motion, and is left
+ * out on phones.
  */
 export default function GalleryStrip({ children }: { children: ReactNode }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
@@ -25,9 +26,12 @@ export default function GalleryStrip({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    // Not on phones — matches the stylesheet's split for the wall.
+    const phone = window.matchMedia('(width < 736px)');
     const id = setInterval(() => {
       const grid = gridRef.current;
       if (!grid) return;
+      if (phone.matches) return setLit(null);
       // Only tiles on show: the stylesheet hides the last two at narrow widths.
       const shown = Array.from(grid.children, (el, i) => ((el as HTMLElement).offsetParent ? i : -1)).filter((i) => i >= 0);
       setLit((prev) => {

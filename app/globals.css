@@ -322,6 +322,13 @@ a:hover { color: var(--pc-cyan-bright); }
 .rd-gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; }
 .rd-gallery-grid > * { aspect-ratio: 3 / 4; }
 .rd-gallery-grid button:focus-visible { outline: 2px solid var(--pc-cyan); outline-offset: -2px; }
+/* The mark in a clip tile's corner. */
+.rd-gallery-icon { position: absolute; top: 10px; right: 10px; width: 20px; height: 20px; filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.7)); }
+/* Two across on a phone, where three made each tile too small to read. */
+@media (width < 736px) {
+  .rd-gallery-grid { grid-template-columns: repeat(2, 1fr); }
+  .rd-gallery-icon { top: 8px; right: 8px; width: 14px; height: 14px; }
+}
 @container (min-width: 1000px) {
   /* The tiles alternate photo, clip. Three across that is already a
      checkerboard; four across it would stack every clip above another, so
@@ -413,6 +420,14 @@ a:hover { color: var(--pc-cyan-bright); }
 /* Below 736px the wall is edge to edge, so the heading keeps a margin of its own. */
 @media (width < 736px) {
   .rd-strip-head { padding-inline: 20px; }
+}
+/* A section's button sits beside its heading on a wide screen and under its
+   content on a phone, so the heading leads straight into the tiles. It is in
+   the markup twice and each width hides one. */
+.rd-foot-cta { display: none; }
+@media (width < 736px) {
+  .rd-head-cta { display: none; }
+  .rd-foot-cta { display: block; padding: 28px 20px 0; }
 }
 .rd-gallery-grid--teaser > :nth-child(n + 7) { display: none; }
 @container (min-width: 1000px) {
@@ -558,26 +573,7 @@ a:hover { color: var(--pc-cyan-bright); }
 @media (hover: hover) {
   .rd-nights:hover .rd-night-bar > span { animation-play-state: paused; }
 }
-.rd-nights:has(:focus-visible) .rd-night-bar > span,
-.rd-nights[data-hold] .rd-night-bar > span { animation-play-state: paused; }
-.rd-night-sound {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  z-index: 3;
-  display: grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  background: rgba(0, 0, 0, 0.6);
-  border: 1px solid var(--pc-line-strong);
-  color: var(--pc-mist);
-  font: 700 12px var(--font-mono);
-  cursor: pointer;
-}
-.rd-night-sound[aria-pressed='true'] { color: var(--pc-black); background: var(--pc-cyan); border-color: var(--pc-cyan); }
-.rd-night-sound:focus-visible { outline: 2px solid var(--pc-cyan); outline-offset: 2px; }
+.rd-nights:has(:focus-visible) .rd-night-bar > span { animation-play-state: paused; }
 .rd-nights-foot {
   display: flex;
   justify-content: space-between;

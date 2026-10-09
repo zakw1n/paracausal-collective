@@ -90,11 +90,9 @@ export function GalleryMediaTile({ tile, onOpen, className = '' }: { tile: Galle
         <LoopVideo src={tile.src} poster={tile.poster} />
         <svg
           viewBox="0 0 24 24"
-          width="20"
-          height="20"
           fill="#fff"
           aria-hidden="true"
-          style={{ position: 'absolute', top: 10, right: 10, filter: 'drop-shadow(0 1px 4px rgba(0,0,0,0.7))' }}
+          className="rd-gallery-icon"
         >
           <path d="M6 2h12a4 4 0 0 1 4 4v12a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V6a4 4 0 0 1 4-4zm3.5 5.5v9l7.5-4.5-7.5-4.5z" fillRule="evenodd" />
         </svg>
