@@ -103,6 +103,12 @@ export const XOSMO_UID = '38e21c329a18245a3ea6d840b0042747';
 export type GalleryClip = {
   /** Silent autoplay loop. Plays on page load, so keep it under ~1MB. */
   src: string;
+  /**
+   * The same loop at about a third of the size, played on phones. Every loop
+   * needs one, uploaded under `sm/` with the same file name: 400px tall for
+   * landscape footage, 360px wide for upright, CRF 32.
+   */
+  smallSrc: string;
   /** Full clip, played in the lightbox. Adaptive, and fetched only on click. */
   fullSrc: string;
   /** First frame, shown while the loop buffers and behind the lightbox video. */
@@ -116,8 +122,9 @@ export type GalleryClip = {
 };
 
 /** Builds a clip, deriving the joined caption so the two never drift apart. */
-const galleryClip = (c: Omit<GalleryClip, 'caption'>): GalleryClip => ({
+const galleryClip = (c: Omit<GalleryClip, 'caption' | 'smallSrc'>): GalleryClip => ({
   ...c,
+  smallSrc: c.src.replace(`${MEDIA_CDN}/`, `${MEDIA_CDN}/sm/`),
   caption: `${c.title} · ${c.date}`,
 });
 

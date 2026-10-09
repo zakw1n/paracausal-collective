@@ -43,9 +43,10 @@ function Caption({ date, title }: { date: string; title: string }) {
  * viewport, so a page that shows several clips below the fold does not pay for
  * them on load; until then the poster stands in.
  */
-function LoopVideo({ src, poster }: { src: string; poster: string }) {
+function LoopVideo({ src, smallSrc, poster }: { src: string; smallSrc: string; poster: string }) {
   const ref = useRef<HTMLVideoElement>(null);
-  const [near, setNear] = useState(false);
+  /** The file to play, chosen once the tile is near: the small cut on a phone. */
+  const [near, setNear] = useState<string | null>(null);
   /** Whether the loop is being shown as an image, autoplay having been refused. */
   const [stand, setStand] = useState(false);
 
@@ -55,14 +56,14 @@ function LoopVideo({ src, poster }: { src: string; poster: string }) {
     const io = new IntersectionObserver(
       ([entry]) => {
         if (!entry.isIntersecting) return;
-        setNear(true);
+        setNear(window.matchMedia('(width < 736px)').matches ? smallSrc : src);
         io.disconnect();
       },
       { rootMargin: '300px' },
     );
     io.observe(el);
     return () => io.disconnect();
-  }, []);
+  }, [src, smallSrc]);
 
   // Where the browser refuses to autoplay, the same file is shown through an
   // image instead — see components/MotionImage.
@@ -73,8 +74,8 @@ function LoopVideo({ src, poster }: { src: string; poster: string }) {
 
   return (
     <>
-      <video ref={ref} src={near ? src : undefined} poster={poster} muted loop autoPlay playsInline data-still={stand ? '' : undefined} style={fillStyle} />
-      {stand && <MotionImage src={src} style={fillStyle} onError={() => setStand(false)} />}
+      <video ref={ref} src={near ?? undefined} poster={poster} muted loop autoPlay playsInline data-still={stand ? '' : undefined} style={fillStyle} />
+      {stand && near && <MotionImage src={near} style={fillStyle} onError={() => setStand(false)} />}
     </>
   );
 }
@@ -87,7 +88,7 @@ export function GalleryMediaTile({ tile, onOpen, className = '' }: { tile: Galle
   if (tile.kind === 'clip') {
     return (
       <button onClick={onOpen} className={`rd-card ${className}`} aria-label={`Play ${tile.title}`} style={tileStyle}>
-        <LoopVideo src={tile.src} poster={tile.poster} />
+        <LoopVideo src={tile.src} smallSrc={tile.smallSrc} poster={tile.poster} />
         <svg
           viewBox="0 0 24 24"
           fill="#fff"
