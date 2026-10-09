@@ -1,40 +1,45 @@
 import Link from 'next/link';
-import Image from 'next/image';
+import { getImageProps } from 'next/image';
 import Button from '@/components/ds/Button';
-import EventTile from '@/components/EventTile';
+import { eyebrow, sectionHeading, sectionPad } from '@/components/ds/styles';
+import EventCarousel from '@/components/EventCarousel';
+import GalleryStrip from '@/components/GalleryStrip';
+import HeroSignup from '@/components/HeroSignup';
 import UpcomingEvent from '@/components/UpcomingEvent';
-import { TICKETS_URL, pastEvents, upcomingEvent } from '@/lib/site';
+import { TICKETS_URL, heroLoop, pastEvents, site, upcomingEvent } from '@/lib/site';
 
-const eyebrow = {
-  fontFamily: 'var(--font-mono)',
-  fontSize: 'var(--fs-xs)',
-  letterSpacing: 'var(--ls-widest)',
-  textTransform: 'uppercase',
-  color: 'var(--pc-cyan)',
-  margin: 0,
-} as const;
-
-const sectionPad = 'clamp(70px,10vh,120px) clamp(20px,5vw,64px)';
+/** The hero lockup, 3:1, in its two cuts; see the <picture> that uses them. */
+const heroLogoSize = { alt: site.name, width: 1040, height: 347, sizes: '(max-width: 1130px) 92vw, 1040px' };
+const heroLogo = getImageProps({ ...heroLogoSize, src: '/logo-chrome.png' }).props;
+const heroLogoPhone = getImageProps({ ...heroLogoSize, src: '/logo-chrome-solid.png' }).props;
 
 export default function Home() {
   return (
     <main>
       {/* ── HERO ── */}
       <section
+        className="rd-hero"
         style={{
           position: 'relative',
-          width: '100%',
-          minHeight: '100vh',
           overflow: 'hidden',
           background: '#000',
           display: 'flex',
           flexDirection: 'column',
         }}
       >
+        {/* Footage behind the lockup. The poster is the container's background,
+            so it shows while the loop buffers and is all that shows when the
+            visitor prefers reduced motion (the video is hidden in CSS). */}
+        <div className="rd-hero-media" style={{ backgroundImage: `url(${heroLoop.poster})` }}>
+          <video src={heroLoop.src} poster={heroLoop.poster} muted loop autoPlay playsInline aria-hidden="true" />
+        </div>
+
         <div
           style={{
+            /* No z-index: a stacking context here would isolate the lockup's
+               screen blend from the footage behind it. Source order alone
+               paints this above the media. */
             position: 'relative',
-            zIndex: 10,
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
@@ -44,139 +49,67 @@ export default function Home() {
             padding: '104px clamp(20px,5vw,64px) 56px',
           }}
         >
-          <p
-            style={{
-              ...eyebrow,
-              fontSize: 'clamp(11px,1.4vw,14px)',
-              margin: '0 0 22px',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 12,
-              flexWrap: 'wrap',
-              justifyContent: 'center',
-            }}
-          >
-            <span>Cape Town</span>
-            <span style={{ color: 'var(--pc-green)' }}>·</span>
-            <span>Est. 2023</span>
-          </p>
-
-          <Image
-            src="/logo.png"
-            alt="paracausal"
-            width={860}
-            height={144}
-            sizes="(max-width: 956px) 90vw, 860px"
-            priority
-            style={{ width: 'min(90%,860px)', height: 'auto', objectFit: 'contain', display: 'block', margin: 0 }}
-          />
-
-          <p style={{ color: 'var(--text-secondary)', fontSize: 'clamp(14px,1.6vw,17px)', lineHeight: 1.7, margin: '18px 0 0', maxWidth: '48ch' }}>
-            A collective pushing high-energy psytrance to a generation chasing deeper realms of consciousness.
-          </p>
-
-          <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', justifyContent: 'center', marginTop: 38, animation: 'rd-rise .9s var(--ease-out) both' }}>
-            <a href={TICKETS_URL} target="_blank" rel="noopener" style={{ textDecoration: 'none' }}>
-              <Button size="lg" variant="primary">Get tickets</Button>
-            </a>
-            <Link href="/events"><Button size="lg" variant="secondary">Upcoming events</Button></Link>
-            <Link href="/about"><Button size="lg" variant="secondary">Our story</Button></Link>
+          {/* The 3D chrome lockup, 3:1. Only the hero uses it; the navbar and
+              footer keep the flat wordmark at /logo.png. The file has no
+              background, and each pixel's brightness is baked into its
+              opacity, so the dark chrome lets the footage through without a
+              blend mode — those fail over video on some phones. */}
+          {/* The lockup takes all the height the hero has to spare and centres
+              in it, so a taller hero grows footage around the logo while the
+              signup stays anchored at the foot, close to the next section. */}
+          <div style={{ flex: 1, alignSelf: 'stretch', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {/* Phones get a denser cut of the same lockup: on a small screen
+                the see-through chrome was too faint against the footage. */}
+            <picture style={{ display: 'contents' }}>
+              <source media="(width < 768px)" srcSet={heroLogoPhone.srcSet} sizes={heroLogo.sizes} />
+              <img
+                {...heroLogo}
+                alt={site.name}
+                loading="eager"
+                fetchPriority="high"
+                style={{ width: 'min(100%,1040px)', height: 'auto', objectFit: 'contain', display: 'block', margin: 0 }}
+              />
+            </picture>
           </div>
+
+          {upcomingEvent && (
+            <div style={{ marginTop: 34 }}>
+              <a href={TICKETS_URL} target="_blank" rel="noopener" style={{ textDecoration: 'none' }}>
+                <Button size="lg" variant="primary">Get tickets</Button>
+              </a>
+            </div>
+          )}
+
+          <HeroSignup />
         </div>
       </section>
+
+      {/* ── GALLERY STRIP ── */}
+      <section className="rd-reveal rd-strip-section">
+        <GalleryStrip>
+          <div className="rd-strip-head">
+            <div>
+              <p style={{ ...eyebrow, margin: '0 0 18px' }}>On the floor</p>
+              <h2 style={{ ...sectionHeading, margin: 0 }}>
+                MOMENTS FROM<br />THE DARK
+              </h2>
+            </div>
+            <Link href="/gallery"><Button size="md" variant="secondary">Enter the gallery</Button></Link>
+          </div>
+        </GalleryStrip>
+      </section>
+
+      {/* ── RECENT NIGHTS ── */}
+      <EventCarousel events={pastEvents} />
 
       {/* ── NEXT UPCOMING EVENT ── */}
       <section className="rd-reveal" style={{ padding: sectionPad }}>
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 32 }}>
-            <p style={eyebrow}>Next upcoming event</p>
+            <p style={eyebrow}>{upcomingEvent ? 'Next upcoming event' : 'Upcoming'}</p>
             <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
           </div>
           <UpcomingEvent />
-        </div>
-      </section>
-
-      {/* ── MANIFESTO ── */}
-      <section className="rd-reveal" style={{ position: 'relative', padding: 'clamp(80px,12vh,140px) clamp(20px,5vw,64px)', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'var(--pc-grad-nebula)' }} />
-        <div style={{ position: 'relative', maxWidth: 1200, margin: '0 auto' }}>
-          <div style={{ maxWidth: 760 }}>
-            <p style={{ ...eyebrow, margin: '0 0 26px' }}>Who we are</p>
-            <h2
-              style={{
-                fontFamily: 'var(--font-techno)',
-                fontWeight: 700,
-                color: '#fff',
-                margin: '0 0 26px',
-                lineHeight: 1,
-                fontSize: 'clamp(2.2rem,5vw,4rem)',
-                letterSpacing: '0.01em',
-              }}
-            >
-              ENTER THE<br />AFTERLIGHT
-            </h2>
-            <p style={{ color: 'var(--text-secondary)', fontSize: 'clamp(15px,1.6vw,18px)', lineHeight: 1.7, maxWidth: '52ch', margin: '0 0 20px' }}>
-              Darker frequencies for deeper realms. What started as a group of friends chasing the wonders of psychedelic
-              music quickly grew into a key player in psytrance adoption in Cape Town.
-            </p>
-            <p style={{ color: 'var(--text-muted)', fontSize: 'clamp(14px,1.5vw,16px)', lineHeight: 1.7, maxWidth: '52ch', margin: '0 0 34px' }}>
-              Paracausal began with a vision — to create a space where people can experience the freedom of psytrance, and
-              liberate themselves to the music.
-            </p>
-            <Link href="/about"><Button size="md" variant="neon">Read our story</Button></Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ── RECENT NIGHTS ── */}
-      <section className="rd-reveal" style={{ padding: sectionPad }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 20, flexWrap: 'wrap', marginBottom: 40 }}>
-            <div>
-              <p style={{ ...eyebrow, margin: '0 0 14px' }}>The archive</p>
-              <h2 style={{ fontFamily: 'var(--font-techno)', fontWeight: 700, color: '#fff', margin: 0, lineHeight: 1, fontSize: 'clamp(2rem,4.5vw,3.4rem)' }}>
-                RECENT NIGHTS
-              </h2>
-            </div>
-            <Link href="/events"><Button size="md" variant="secondary">All events</Button></Link>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 16 }}>
-            {pastEvents.slice(0, 3).map((event) => (
-              <EventTile key={event.title} event={event} compact />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── GALLERY TEASER ── */}
-      <section className="rd-reveal" style={{ position: 'relative', padding: sectionPad, borderTop: '1px solid var(--border)', overflow: 'hidden' }}>
-        <div className="rd-split" style={{ maxWidth: 1200, margin: '0 auto' }}>
-          <div className="rd-card" style={{ position: 'relative', aspectRatio: '16 / 10', border: '1px solid var(--border)', borderRadius: 'var(--r-lg)', overflow: 'hidden', background: '#000' }}>
-            <video
-              src="/gallery/skorgen-loop.mp4"
-              muted
-              loop
-              autoPlay
-              playsInline
-              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
-            />
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(5,6,10,0) 55%, rgba(5,6,10,0.75) 100%)' }} />
-            <div style={{ position: 'absolute', bottom: 16, left: 18, fontFamily: 'var(--font-mono)', fontSize: 'var(--fs-2xs)', letterSpacing: 'var(--ls-wide)', textTransform: 'uppercase', color: '#fff' }}>
-              ZDLCK B2B Skorgen · Apr 2026
-            </div>
-          </div>
-
-          <div>
-            <p style={{ ...eyebrow, margin: '0 0 18px' }}>On the floor</p>
-            <h2 style={{ fontFamily: 'var(--font-techno)', fontWeight: 700, color: '#fff', margin: '0 0 20px', lineHeight: 1, fontSize: 'clamp(2rem,4.5vw,3.4rem)' }}>
-              MOMENTS FROM<br />THE DARK
-            </h2>
-            <p style={{ color: 'var(--text-secondary)', fontSize: 'clamp(15px,1.6vw,17px)', lineHeight: 1.7, maxWidth: '46ch', margin: '0 0 30px' }}>
-              Sets, crowds, and the spaces between. A living archive of every threshold we&rsquo;ve crossed together.
-            </p>
-            <Link href="/gallery"><Button size="md" variant="secondary">Enter the gallery</Button></Link>
-          </div>
         </div>
       </section>
 
@@ -190,6 +123,7 @@ export default function Home() {
           <h2
             style={{
               fontFamily: 'var(--font-techno)',
+              fontStretch: '125%',
               fontWeight: 800,
               color: '#fff',
               margin: '0 0 18px',
@@ -200,12 +134,18 @@ export default function Home() {
           >
             FIND THE<br />FREQUENCY
           </h2>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'clamp(12px,1.5vw,15px)', letterSpacing: 'var(--ls-wider)', textTransform: 'uppercase', color: 'var(--text-secondary)', margin: '0 0 34px' }}>
-            {`Afterlight V · ${upcomingEvent.date} · EVØL Nightclub`}
-          </p>
-          <a href={TICKETS_URL} target="_blank" rel="noopener" style={{ textDecoration: 'none' }}>
-            <Button size="lg" variant="primary">Get tickets</Button>
-          </a>
+          {upcomingEvent && (
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'clamp(12px,1.5vw,15px)', letterSpacing: 'var(--ls-wider)', textTransform: 'uppercase', color: 'var(--text-secondary)', margin: '0 0 34px' }}>
+              {`${upcomingEvent.title} · ${upcomingEvent.date} · ${upcomingEvent.venue}`}
+            </p>
+          )}
+          {upcomingEvent ? (
+            <a href={TICKETS_URL} target="_blank" rel="noopener" style={{ textDecoration: 'none' }}>
+              <Button size="lg" variant="primary">Get tickets</Button>
+            </a>
+          ) : (
+            <Link href="/events"><Button size="lg" variant="primary">See past nights</Button></Link>
+          )}
         </div>
       </section>
     </main>

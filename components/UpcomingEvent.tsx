@@ -1,10 +1,16 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import Badge from '@/components/ds/Badge';
 import Button from '@/components/ds/Button';
-import { TICKETS_URL, upcomingEvent } from '@/lib/site';
+import { PLACEHOLDER_IMAGE, TICKETS_URL, upcomingEvent } from '@/lib/site';
 
-/** Hero banner for the next night. `minHeight` differs between home and events. */
+/**
+ * Hero for the next night, or an announcement placeholder when nothing is
+ * scheduled. `minHeight` differs between home and events.
+ */
 export default function UpcomingEvent({ minHeight = 'clamp(340px,52vh,460px)' }: { minHeight?: string }) {
+  if (!upcomingEvent) return <NoUpcomingEvent minHeight={minHeight} />;
+
   return (
     <div
       style={{
@@ -41,6 +47,7 @@ export default function UpcomingEvent({ minHeight = 'clamp(340px,52vh,460px)' }:
         <h2
           style={{
             fontFamily: 'var(--font-techno)',
+            fontStretch: '125%',
             fontWeight: 800,
             color: '#fff',
             margin: '0 0 14px',
@@ -81,6 +88,76 @@ export default function UpcomingEvent({ minHeight = 'clamp(340px,52vh,460px)' }:
           </span>
         </div>
       </div>
+    </div>
+  );
+}
+
+/** Shown when no night is scheduled — never a ticket link to a finished event. */
+function NoUpcomingEvent({ minHeight }: { minHeight: string }) {
+  return (
+    <div
+      style={{
+        position: 'relative',
+        overflow: 'hidden',
+        border: '1px dashed var(--border-strong)',
+        borderRadius: 'var(--r-lg)',
+        background: 'var(--pc-abyss, #0A0C12)',
+        minHeight,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 18,
+        padding: 'clamp(28px,5vw,56px)',
+        textAlign: 'center',
+      }}
+    >
+      <div
+        aria-hidden
+        style={{ position: 'absolute', inset: 0, background: 'var(--pc-grad-aura)', opacity: 0.07 }}
+      />
+
+      <Image
+        src={PLACEHOLDER_IMAGE}
+        alt=""
+        width={64}
+        height={64}
+        style={{ position: 'relative', objectFit: 'contain', opacity: 0.4, filter: 'drop-shadow(0 0 18px rgba(52,231,222,0.35))' }}
+      />
+
+      <h2
+        style={{
+          position: 'relative',
+          fontFamily: 'var(--font-techno)',
+          fontStretch: '125%',
+          fontWeight: 800,
+          color: '#fff',
+          margin: 0,
+          lineHeight: 0.95,
+          fontSize: 'clamp(1.8rem,5vw,3.4rem)',
+          textTransform: 'uppercase',
+        }}
+      >
+        Next night<br />to be announced
+      </h2>
+
+      <p
+        style={{
+          position: 'relative',
+          fontFamily: 'var(--font-mono)',
+          fontSize: 'var(--fs-xs)',
+          letterSpacing: 'var(--ls-wider)',
+          textTransform: 'uppercase',
+          color: 'var(--text-muted)',
+          margin: 0,
+        }}
+      >
+        Follow us for the drop
+      </p>
+
+      <Link href="/events" style={{ position: 'relative', textDecoration: 'none' }}>
+        <Button size="md" variant="secondary">See past nights</Button>
+      </Link>
     </div>
   );
 }

@@ -1,30 +1,18 @@
 import type { Metadata } from 'next';
 import ArtistCard from '@/components/ArtistCard';
-import { artists } from '@/lib/site';
+import { artists, pageTitle } from '@/lib/site';
+import PageHeader from '@/components/PageHeader';
+import { eyebrowMuted as divider } from '@/components/ds/styles';
 
 export const metadata: Metadata = {
-  title: 'Artists — Paracausal',
+  title: pageTitle('Artists'),
   description: 'The DJs and live acts who have played Paracausal nights in Cape Town.',
 };
-
-const divider = {
-  fontFamily: 'var(--font-mono)',
-  fontSize: 'var(--fs-2xs)',
-  letterSpacing: 'var(--ls-widest)',
-  textTransform: 'uppercase',
-  color: 'var(--text-muted)',
-  margin: 0,
-} as const;
 
 export default function ArtistsPage() {
   return (
     <main className="rd-reveal" style={{ padding: '120px clamp(20px,5vw,64px) 110px', maxWidth: 1200, margin: '0 auto' }}>
-      <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--fs-xs)', letterSpacing: 'var(--ls-widest)', textTransform: 'uppercase', color: 'var(--pc-cyan)', margin: '0 0 16px' }}>
-        Roster
-      </p>
-      <h1 style={{ fontFamily: 'var(--font-techno)', fontWeight: 800, color: '#fff', margin: '0 0 8px', lineHeight: 0.95, fontSize: 'clamp(2.6rem,8vw,6rem)' }}>
-        ARTISTS &amp;<br /><span style={{ color: 'var(--text-faint)' }}>RESIDENTS</span>
-      </h1>
+      <PageHeader eyebrow="Roster" title="ARTISTS" />
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 16, margin: '56px 0 24px' }}>
         <p style={divider}>Played for us</p>

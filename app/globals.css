@@ -1,8 +1,15 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Orbitron:wght@500;600;700;800;900&family=Space+Mono:wght@400;700&family=Archivo+Black&display=swap');
+/* Webfonts are linked from app/layout.tsx — see the note there. */
 @import './styles/tokens.css';
 @import "tailwindcss";
 
+/* Headings run in the same heavy expanded Archivo as the fullscreen menu.
+   Overridden here rather than in tokens.css, which is exported from the Claude
+   Design project and would lose the edit on the next sync. Every call site
+   pairs this with `font-stretch: 125%` — the width axis is a separate property
+   and cannot be carried by the family name alone. */
 :root {
+  --font-techno: 'Archivo', 'Archivo Black', Impact, sans-serif;
+
   --bg-void: #080808;
   --bg-deep: #0a0a14;
   --bg-surface: #0e0e1c;
@@ -46,6 +53,16 @@ body::-webkit-scrollbar {
   display: none;
 }
 
+/* Horizontal scroller (the archive carousel) — same hidden bar as the page,
+   since the row is driven by arrows, drag and snap rather than a track. */
+.rd-scroll-x {
+  scrollbar-width: none;
+}
+
+.rd-scroll-x::-webkit-scrollbar {
+  display: none;
+}
+
 /* ── Typography ── */
 .font-display {
   font-family: 'Bebas Neue', sans-serif;
@@ -63,104 +80,9 @@ body::-webkit-scrollbar {
   color: #fff;
 }
 
-/* ── Noise overlay texture ── */
-.noise::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-  pointer-events: none;
-  z-index: 9999;
-  opacity: 0.04;
-}
-
-/* ── Glitch keyframes ── */
-@keyframes glitch-1 {
-  0%, 100% { clip-path: inset(0 0 95% 0); transform: translate(-3px, 0); }
-  20%       { clip-path: inset(30% 0 60% 0); transform: translate(3px, 0); }
-  40%       { clip-path: inset(60% 0 20% 0); transform: translate(-2px, 0); }
-  60%       { clip-path: inset(80% 0 5% 0);  transform: translate(2px, 0); }
-  80%       { clip-path: inset(10% 0 80% 0); transform: translate(0px, 0); }
-}
-
-@keyframes glitch-2 {
-  0%, 100% { clip-path: inset(50% 0 30% 0); transform: translate(3px, 0); opacity: 0.6; }
-  25%       { clip-path: inset(10% 0 70% 0); transform: translate(-3px, 0); opacity: 0.8; }
-  50%       { clip-path: inset(70% 0 10% 0); transform: translate(2px, 0);  opacity: 0.5; }
-  75%       { clip-path: inset(20% 0 60% 0); transform: translate(-2px, 0); opacity: 0.7; }
-}
-
-@keyframes flicker {
-  0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
-  20%, 24%, 55% { opacity: 0.3; }
-}
-
-@keyframes scanline {
-  0%   { transform: translateY(-100%); }
-  100% { transform: translateY(100vh); }
-}
-
-@keyframes pulse-glow {
-  0%, 100% { box-shadow: var(--glow-purple); }
-  50%       { box-shadow: 0 0 60px rgba(123, 47, 190, 0.7), 0 0 120px rgba(123, 47, 190, 0.3); }
-}
-
-@keyframes energy-flow {
-  0%   { background-position: 0% 50%; }
-  50%  { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50%       { transform: translateY(-12px); }
-}
-
-@keyframes rotate-slow {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
-}
-
-/* ── Utility glows ── */
-.glow-purple { box-shadow: var(--glow-purple); }
-.glow-indigo { box-shadow: var(--glow-indigo); }
-.text-glow-purple { text-shadow: 0 0 20px rgba(55, 31, 118, 0.9), 0 0 40px rgba(55, 31, 118, 0.4); }
-.text-glow-indigo  { text-shadow: 0 0 20px rgba(2, 0, 121, 0.9), 0 0 40px rgba(2, 0, 121, 0.4); }
-
-/* ── Gradient borders ── */
-.border-gradient {
-  border: 1px solid transparent;
-  background-clip: padding-box;
-  position: relative;
-}
-.border-gradient::before {
-  content: '';
-  position: absolute;
-  inset: -1px;
-  border-radius: inherit;
-  background: linear-gradient(135deg, rgba(123,47,190,0.6), transparent, rgba(57,255,20,0.3));
-  z-index: -1;
-}
-
 /* ── Section base ── */
 section {
   position: relative;
-}
-
-/* ── Scanline overlay ── */
-.scanlines::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 2px,
-    rgba(0,0,0,0.08) 2px,
-    rgba(0,0,0,0.08) 4px
-  );
-  pointer-events: none;
-  z-index: 1;
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -178,22 +100,110 @@ a:hover { color: var(--pc-cyan-bright); }
 @keyframes rd-rise    { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
 @keyframes rd-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
-/* Nav underline sweep */
-.nav-links { display: flex; gap: 34px; }
-.nav-links a { position: relative; padding: 7px 0; transition: color 0.25s ease; }
-.nav-links a::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  height: 1px;
-  width: 0;
-  background: var(--pc-cyan);
-  box-shadow: 0 0 8px rgba(52, 231, 222, 0.85);
-  transition: width 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+/* Site nav — components/Navbar.tsx
+   A bar of icons along the foot of the screen on a phone; from 768px a rail
+   down the left edge that widens into a labelled drawer on hover. */
+:root {
+  --nav-bar: 50px;   /* height of the phone bar, before the home-indicator inset */
+  --nav-rail: 72px;  /* width of the collapsed rail */
+  /* Width of the rail's open drawer. Scales with the window so it stays in
+     proportion: 232px on a small laptop, up to 336px on a wide display. */
+  --nav-drawer: clamp(232px, 17.5vw, 336px);
 }
-.nav-links a:hover::after { width: 100%; }
-.nav-burger { display: none; }
+
+/* Page content steps out from under the nav. Hung on :has() rather than a
+   wrapper so routes that suppress the shared chrome (see SiteChrome) get no
+   inset without having to know about it. */
+body:has(.pc-nav) { padding-bottom: calc(var(--nav-bar) + env(safe-area-inset-bottom)); }
+
+.pc-nav {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 80;
+  display: flex;
+  height: calc(var(--nav-bar) + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
+  background: var(--pc-void);
+  border-top: 1px solid var(--border);
+}
+.pc-nav-list { display: flex; flex: 1; }
+.pc-nav-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  text-decoration: none;
+}
+/* Restated because the global `a:hover` cyan rule would otherwise win. */
+.pc-nav-item:hover { color: #fff; }
+.pc-nav-item:focus-visible,
+.pc-nav-brand:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
+.pc-nav-icon { flex-shrink: 0; stroke-width: 2; }
+.pc-nav-item--active .pc-nav-icon { stroke-width: 2.8; }
+/* The phone bar is icons only; each link carries its name in aria-label. */
+.pc-nav-label,
+.pc-nav-brand,
+.pc-nav-foot { display: none; }
+
+@media (min-width: 768px) {
+  /* Inset on both sides, not just the rail's: content stays centred on the
+     window and the rail simply sits over the left margin. Full-bleed sections
+     pull themselves back out (see .rd-hero). */
+  body:has(.pc-nav) { padding-bottom: 0; padding-inline: var(--nav-rail); }
+  .pc-nav {
+    inset: 0 auto 0 0;
+    flex-direction: column;
+    width: var(--nav-rail);
+    height: auto;
+    /* 34px above a 24px mark puts its centre 46px down, and the list below
+       steps in 56px beats (48px rows, 8px apart). */
+    padding: 34px 12px 28px;
+    border-top: 0;
+    /* Clips the labels while collapsed. The drawer opens over the page rather
+       than pushing it, so hovering never reflows what the visitor is reading. */
+    overflow: hidden;
+    transition: width 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  /* :has(:focus-visible) rather than :focus-within — a clicked link keeps
+     focus, which would pin the drawer open after the pointer has left. */
+  .pc-nav:hover,
+  .pc-nav:has(:focus-visible) { width: var(--nav-drawer); }
+
+  /* Hangs from the mark rather than centring, so the icons hold their place
+     whatever the window height: the first sits 159px down. */
+  .pc-nav-list { flex-direction: column; justify-content: flex-start; gap: 8px; margin-top: 77px; }
+  .pc-nav-brand,
+  .pc-nav-item {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 16px;
+    height: 48px;
+    /* 12px either side of a 24px icon fills the collapsed rail's 48px inner
+       width exactly, so icons sit centred and do not move as it opens. */
+    padding: 0 12px;
+    border-radius: 8px;
+    white-space: nowrap;
+    transition: background 0.2s ease;
+  }
+  .pc-nav-brand { height: 24px; }
+  /* The pill marks the pointer, not the page: the current link is told apart
+     by its heavier icon and bold label alone. */
+  .pc-nav-item:hover { background: rgba(255, 255, 255, 0.1); }
+
+  .pc-nav-label {
+    display: block;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  .pc-nav-item--active .pc-nav-label { font-weight: 700; }
+  .pc-nav:hover .pc-nav-label,
+  .pc-nav:has(:focus-visible) .pc-nav-label { opacity: 1; }
+}
 
 /* Scroll reveal — driven by components/RevealObserver.tsx */
 .rd-reveal {
@@ -227,8 +237,9 @@ a:hover { color: var(--pc-cyan-bright); }
   position: absolute;
   inset: 0;
   /* Near-full scrim rather than a bottom fade: these tiles are wide and short
-     (16:9 banners), so the caption reaches high enough that a bottom-anchored
-     gradient leaves the title fighting the artwork's own printed type. */
+     (3:1, matching the banner art), so the caption fills most of the tile and a
+     bottom-anchored gradient would leave the title fighting the artwork's own
+     printed type. */
   background: linear-gradient(to top,
               rgba(5, 6, 10, 0.94) 0%,
               rgba(5, 6, 10, 0.86) 55%,
@@ -244,7 +255,7 @@ a:hover { color: var(--pc-cyan-bright); }
   left: 0;
   right: 0;
   bottom: 0;
-  padding: 22px;
+  padding: 16px 20px;
   text-align: center;
   opacity: 0;
   transform: translateY(8px);
@@ -287,35 +298,146 @@ a:hover { color: var(--pc-cyan-bright); }
   box-shadow: var(--glow-cyan);
 }
 
-@media (max-width: 860px) {
-  .nav-links, .nav-cta { display: none !important; }
-  .nav-burger { display: inline-flex !important; }
-}
-
 @media (prefers-reduced-motion: reduce) {
+  .rd-hero-media video { display: none; }
   .rd-reveal { opacity: 1 !important; transform: none !important; }
   .rd-caption { transform: none !important; transition: opacity 0.3s ease; }
   .rd-card img, .rd-card video, .rd-card:hover img, .rd-card:hover video { transform: none !important; }
+  .pc-nav, .pc-nav-label { transition: none; }
 }
 
 /* ── Redesign layout grids (collapse on narrow viewports) ── */
-.rd-footer-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 40px; }
 .rd-split       { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(30px, 5vw, 70px); align-items: center; }
 .rd-stats       { display: grid; grid-template-columns: repeat(4, 1fr); }
 .rd-contact     { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: clamp(32px, 6vw, 72px); }
 .rd-form-row    { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .rd-chapter     { display: grid; grid-template-columns: auto 1fr; gap: clamp(20px, 4vw, 48px); align-items: start; }
-.rd-gallery-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); grid-auto-rows: 220px; gap: 14px; }
-.rd-gallery-feature { grid-column: span 2; grid-row: span 2; }
+/* Gallery wall — components/GalleryGrid.tsx. Laid out to the measurements of
+   a social explore feed so it browses the same way: uniform 3:4 tiles with
+   hairline seams, three across, four once the grid itself is 1000px wide.
+
+   Below 736px the wall runs edge to edge. Above it the wall is 74% of the
+   window, which is what keeps it clear of the nav rail without being offset
+   for it. The wall is a size container so the column switch can follow the
+   grid's own width rather than the window's. */
+.rd-gallery-page { padding: 120px 0 110px; }
+.rd-gallery-wall { container-type: inline-size; }
+@media (min-width: 736px) {
+  .rd-gallery-wall { box-sizing: content-box; width: 74vw; max-width: 1457px; padding: 24px 20px 0; margin: 0 auto 30px; }
+}
+.rd-gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; }
+.rd-gallery-grid > * { aspect-ratio: 3 / 4; }
+.rd-gallery-grid button:focus-visible { outline: 2px solid var(--pc-cyan); outline-offset: -2px; }
+@container (min-width: 1000px) {
+  /* The tiles alternate photo, clip. Three across that is already a
+     checkerboard; four across it would stack every clip above another, so
+     each pair in every second row trades places. Dense flow lets a tile sent
+     back to an earlier column drop into the row it belongs to. */
+  .rd-gallery-grid { grid-template-columns: repeat(4, 1fr); grid-auto-flow: row dense; }
+  .rd-gallery-grid > :nth-child(8n + 5) { grid-column: 2; }
+  .rd-gallery-grid > :nth-child(8n + 6) { grid-column: 1; }
+  .rd-gallery-grid > :nth-child(8n + 7) { grid-column: 4; }
+  .rd-gallery-grid > :nth-child(8n + 8) { grid-column: 3; }
+}
+
+/* Caption stays off the artwork until the pointer or keyboard lands on a tile.
+   Deliberately not pinned open on touch, unlike .rd-caption — the wall reads as
+   pure imagery on a phone and the lightbox is one tap away. */
+.rd-gallery-cap {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 48px 16px 14px;
+  background: linear-gradient(180deg, rgba(5, 6, 10, 0) 0%, rgba(5, 6, 10, 0.88) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+@media (hover: hover) {
+  .rd-card:hover .rd-gallery-cap { opacity: 1; }
+}
+.rd-card:focus-visible .rd-gallery-cap { opacity: 1; }
+
+/* Home hero footage — app/page.tsx. The scrim keeps the lockup, tagline and
+   signup legible over any frame and fades to the page colour at the foot so
+   the section below joins without a seam. */
+/* `width < 768px` rather than `max-width: 767px` throughout: at a zoomed
+   viewport the width can land between the two, and a max/min pair would then
+   match neither side. */
+/* Full-screen at every width. The lockup
+   centres in whatever height that gives and the signup sits at the foot (see
+   app/page.tsx), so the extra height goes to footage, not to dead space. */
+.rd-hero { min-height: 100vh; }
+@media (width < 768px) {
+  /* One full screen, less the bottom bar that sits over the page: the signup
+     lands just above the bar and nothing of the next section shows. */
+  .rd-hero { min-height: calc(100svh - var(--nav-bar) - env(safe-area-inset-bottom)); }
+}
+@media (min-width: 768px) {
+  /* Back out over the body's rail insets so the footage spans the window;
+     the padding keeps the lockup itself clear of the rail. */
+  body:has(.pc-nav) .rd-hero { margin-inline: calc(-1 * var(--nav-rail)); padding-inline: var(--nav-rail); }
+}
+/* The arrow inside the hero signup field. */
+.rd-signup-go {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--pc-white);
+  cursor: pointer;
+  transition: color .2s, transform .2s;
+}
+.rd-signup-go:hover, .rd-signup-go:focus-visible { color: var(--pc-cyan); transform: translateX(2px); }
+.rd-signup-go:focus-visible { outline: 2px solid var(--pc-cyan); outline-offset: -6px; }
+.rd-signup-go:disabled { opacity: .5; cursor: progress; transform: none; }
+
+.rd-hero-media { position: absolute; inset: 0; background: #000 center / cover no-repeat; }
+.rd-hero-media video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.rd-hero-media::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.45) 55%, var(--pc-void) 100%),
+    radial-gradient(70% 55% at 50% 45%, rgba(0, 0, 0, 0.45) 0%, transparent 100%);
+}
+
+/* Home gallery strip — components/GalleryStrip.tsx. The gallery wall's own
+   container and grid, with a heading inside it, cut to two full rows: six
+   tiles while the grid is three across, all eight once it is four. The rest
+   stay reachable by stepping through the lightbox.
+
+   Less padding on top than a normal section: it follows straight on from the
+   hero, which brings its own space below the signup. */
+.rd-strip-section { padding: clamp(40px, 6vh, 64px) 0 clamp(70px, 10vh, 120px); }
+.rd-strip-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; margin-bottom: 32px; }
+/* Below 736px the wall is edge to edge, so the heading keeps a margin of its own. */
+@media (width < 736px) {
+  .rd-strip-head { padding-inline: 20px; }
+}
+.rd-gallery-grid--teaser > :nth-child(n + 7) { display: none; }
+@container (min-width: 1000px) {
+  .rd-gallery-grid--teaser > :nth-child(n + 7) { display: block; }
+}
+
+/* Tiles in these grids butt together with no gutter, so the shared .rd-card
+   hover lift is wrong — raising one would open a seam and drop a glow ring onto
+   its neighbours. The artwork's own scale-up carries the hover instead. */
+.rd-gallery-grid .rd-card:hover,
+.rd-events-grid .rd-card:hover {
+  transform: none;
+  box-shadow: none;
+  border-color: transparent !important;
+}
 
 @media (max-width: 860px) {
-  .rd-footer-grid { grid-template-columns: 1fr; gap: 32px; }
   .rd-split,
   .rd-contact,
   .rd-form-row { grid-template-columns: 1fr; }
   .rd-stats { grid-template-columns: repeat(2, 1fr); }
 }
 
-@media (max-width: 620px) {
-  .rd-gallery-feature { grid-column: span 1; }
-}

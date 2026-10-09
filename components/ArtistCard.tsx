@@ -47,6 +47,7 @@ export default function ArtistCard({ artist }: { artist: Artist }) {
       <h3
         style={{
           fontFamily: 'var(--font-techno)',
+          fontStretch: '125%',
           fontWeight: 700,
           fontSize: 'clamp(1.05rem,2vw,1.35rem)',
           color: '#fff',
@@ -119,6 +120,7 @@ export default function ArtistCard({ artist }: { artist: Artist }) {
             <span
               style={{
                 fontFamily: 'var(--font-techno)',
+                fontStretch: '125%',
                 fontWeight: 800,
                 fontSize: 'clamp(2.5rem,6vw,4rem)',
                 color: 'var(--pc-white)',

@@ -1,8 +1,10 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
+import { byline, pageTitle, site, PLACEHOLDER_IMAGE } from '@/lib/site';
+import PageHeader from '@/components/PageHeader';
 
 export const metadata: Metadata = {
-  title: 'About — Paracausal',
+  title: pageTitle('About'),
   description: 'The story of Paracausal: from house parties and secret beach raves to a residency at EVØL Nightclub.',
 };
 
@@ -17,7 +19,7 @@ const chapters: { heading: string; paragraphs: string[] }[] = [
   {
     heading: 'The vision',
     paragraphs: [
-      'What started as a group of friends enjoying the wonders of psychedelic music, quickly grew into a key play in psytrance adoption in Cape Town. Paracausal started with a vision, and that vision was to create a space where people can experience the freedom of psytrance, and liberate themselves to the music. From house parties, to secret beach raves, we now find ourselves with a residency at Evol Nightclub, where we have the privilege of sharing our AFTERLIGHT series with Cape Town’s youth.',
+      'What started as a group of friends enjoying the wonders of psychedelic music, quickly grew into a key player in psytrance adoption in Cape Town. Paracausal started with a vision, and that vision was to create a space where people can experience the freedom of psytrance, and liberate themselves to the music. From house parties, to secret beach raves, we now find ourselves with a residency at Evol Nightclub, where we have the privilege of sharing our AFTERLIGHT series with Cape Town’s youth.',
     ],
   },
   {
@@ -73,13 +75,7 @@ const body = {
 export default function AboutPage() {
   return (
     <main className="rd-reveal" style={{ padding: '120px clamp(20px,5vw,64px) 110px', maxWidth: 1000, margin: '0 auto' }}>
-      <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--fs-xs)', letterSpacing: 'var(--ls-widest)', textTransform: 'uppercase', color: 'var(--pc-cyan)', margin: '0 0 16px' }}>
-        Who we are
-      </p>
-      <h1 style={{ fontFamily: 'var(--font-techno)', fontWeight: 800, color: '#fff', margin: '0 0 20px', lineHeight: 0.95, fontSize: 'clamp(2.6rem,8vw,6rem)' }}>
-        ABOUT<br /><span style={{ color: 'var(--text-faint)' }}>PARACAUSAL</span>
-      </h1>
-      <div style={{ height: 1, width: 120, background: 'linear-gradient(to right, var(--pc-cyan), transparent)', marginBottom: 56 }} />
+      <PageHeader eyebrow="Who we are" title="ABOUT" rule />
 
       {/* Stats strip */}
       <div className="rd-stats" style={{ border: '1px solid var(--border)', borderRadius: 'var(--r-lg)', overflow: 'hidden', marginBottom: 60 }}>
@@ -88,7 +84,7 @@ export default function AboutPage() {
             key={stat.label}
             style={{ padding: '32px 18px', textAlign: 'center', borderRight: i === stats.length - 1 ? undefined : '1px solid var(--border)' }}
           >
-            <p style={{ fontFamily: 'var(--font-techno)', fontWeight: 700, fontSize: 'clamp(1.6rem,3vw,2.4rem)', color: '#fff', margin: 0 }}>{stat.value}</p>
+            <p style={{ fontFamily: 'var(--font-techno)', fontStretch: '125%', fontWeight: 700, fontSize: 'clamp(1.6rem,3vw,2.4rem)', color: '#fff', margin: 0 }}>{stat.value}</p>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 'var(--ls-wider)', textTransform: 'uppercase', color: 'var(--text-muted)', margin: '6px 0 0' }}>
               {stat.label}
             </p>
@@ -122,17 +118,17 @@ export default function AboutPage() {
       <div style={{ position: 'relative', border: '1px solid var(--border)', borderRadius: 'var(--r-lg)', padding: 'clamp(40px,7vw,80px) clamp(24px,5vw,60px)', textAlign: 'center', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'var(--pc-grad-nebula)' }} />
         <Image
-          src="/logo/sphere.png"
+          src={PLACEHOLDER_IMAGE}
           alt=""
           width={64}
           height={64}
           style={{ position: 'relative', objectFit: 'contain', opacity: 0.85, filter: 'drop-shadow(0 0 18px rgba(52,231,222,0.5))', marginBottom: 22, animation: 'rd-drift 50s linear infinite' }}
         />
-        <p style={{ position: 'relative', fontFamily: 'var(--font-techno)', fontWeight: 700, color: '#fff', lineHeight: 1.2, fontSize: 'clamp(1.5rem,3.4vw,2.6rem)', margin: 0, letterSpacing: '0.01em' }}>
-          &ldquo;Existing at the edge<br />of perception.&rdquo;
+        <p style={{ position: 'relative', fontFamily: 'var(--font-techno)', fontStretch: '125%', fontWeight: 700, color: '#fff', lineHeight: 1.2, fontSize: 'clamp(1.5rem,3.4vw,2.6rem)', margin: 0, letterSpacing: '0.01em', textWrap: 'balance', maxWidth: '14ch', marginInline: 'auto' }}>
+          &ldquo;{site.pullQuote}&rdquo;
         </p>
         <p style={{ position: 'relative', fontFamily: 'var(--font-mono)', fontSize: 'var(--fs-2xs)', letterSpacing: 'var(--ls-widest)', textTransform: 'uppercase', color: 'var(--text-muted)', margin: '20px 0 0' }}>
-          Paracausal Collective · Cape Town
+          {byline}
         </p>
       </div>
     </main>

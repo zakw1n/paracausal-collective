@@ -5,7 +5,8 @@ import { notFound } from 'next/navigation';
 import ArtistCard from '@/components/ArtistCard';
 import EventMediaGrid from '@/components/EventMediaGrid';
 import Tag from '@/components/ds/Tag';
-import { TICKETS_URL, artistsForEvent, eventById, events } from '@/lib/site';
+import { eyebrowMuted as divider } from '@/components/ds/styles';
+import { TICKETS_URL, artistsForEvent, eventById, events, pageTitle } from '@/lib/site';
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -16,23 +17,14 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { id } = await params;
   const event = eventById(id);
-  if (!event) return { title: 'Event not found — Paracausal' };
+  if (!event) return { title: pageTitle('Event not found') };
 
   return {
-    title: `${event.title} — Paracausal`,
+    title: pageTitle(event.title),
     description: `${event.title} · ${event.date} · ${event.venue}`,
     openGraph: { images: [event.banner] },
   };
 }
-
-const divider = {
-  fontFamily: 'var(--font-mono)',
-  fontSize: 'var(--fs-2xs)',
-  letterSpacing: 'var(--ls-widest)',
-  textTransform: 'uppercase',
-  color: 'var(--text-muted)',
-  margin: 0,
-} as const;
 
 const meta = {
   fontFamily: 'var(--font-mono)',
@@ -99,6 +91,7 @@ export default async function EventPage({ params }: Params) {
           <h1
             style={{
               fontFamily: 'var(--font-techno)',
+              fontStretch: '125%',
               fontWeight: 800,
               color: '#fff',
               textTransform: 'uppercase',
@@ -156,7 +149,7 @@ export default async function EventPage({ params }: Params) {
 
       <SectionHeading>Location</SectionHeading>
       <div style={{ border: '1px solid var(--border)', borderRadius: 'var(--r-lg)', padding: 'clamp(20px,4vw,28px)' }}>
-        <p style={{ fontFamily: 'var(--font-techno)', fontWeight: 700, fontSize: 'clamp(1.1rem,2.2vw,1.5rem)', color: '#fff', textTransform: 'uppercase', margin: '0 0 8px' }}>
+        <p style={{ fontFamily: 'var(--font-techno)', fontStretch: '125%', fontWeight: 700, fontSize: 'clamp(1.1rem,2.2vw,1.5rem)', color: '#fff', textTransform: 'uppercase', margin: '0 0 8px' }}>
           {event.venue}
         </p>
         {event.address && <p style={{ ...meta, letterSpacing: 'var(--ls-wide)', color: 'var(--text-faint)', margin: 0 }}>{event.address}</p>}

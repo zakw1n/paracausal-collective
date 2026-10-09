@@ -1,9 +1,11 @@
 import type { Metadata } from 'next';
 import ContactForm from '@/components/ContactForm';
-import { socials } from '@/lib/site';
+import { pageTitle, site, socials } from '@/lib/site';
+import PageHeader from '@/components/PageHeader';
+import { metaText as socialLink } from '@/components/ds/styles';
 
 export const metadata: Metadata = {
-  title: 'Contact — Paracausal',
+  title: pageTitle('Contact'),
   description: 'Get in touch with Paracausal Collective. Bookings, collaborations and enquiries.',
 };
 
@@ -16,30 +18,17 @@ const label = {
   margin: '0 0 10px',
 } as const;
 
-const socialLink = {
-  fontFamily: 'var(--font-mono)',
-  fontSize: 'var(--fs-xs)',
-  letterSpacing: 'var(--ls-wide)',
-  textTransform: 'uppercase',
-  color: 'var(--text-secondary)',
-} as const;
-
 export default function ContactPage() {
   return (
     <main className="rd-reveal" style={{ padding: '120px clamp(20px,5vw,64px) 110px', maxWidth: 1080, margin: '0 auto' }}>
-      <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--fs-xs)', letterSpacing: 'var(--ls-widest)', textTransform: 'uppercase', color: 'var(--pc-cyan)', margin: '0 0 16px' }}>
-        Reach out
-      </p>
-      <h1 style={{ fontFamily: 'var(--font-techno)', fontWeight: 800, color: '#fff', margin: '0 0 52px', lineHeight: 0.95, fontSize: 'clamp(2.6rem,8vw,6rem)' }}>
-        GET IN<br /><span style={{ color: 'var(--text-faint)' }}>TOUCH</span>
-      </h1>
+      <PageHeader eyebrow="Reach out" title="CONTACT" gap={52} />
 
       <div className="rd-contact">
         <div style={{ display: 'flex', flexDirection: 'column', gap: 36 }}>
           <div>
             <p style={label}>Email</p>
-            <a href="mailto:paracausalevents@gmail.com" style={{ color: '#fff', fontSize: 15, letterSpacing: '0.02em' }}>
-              paracausalevents@gmail.com
+            <a href={`mailto:${site.email}`} style={{ color: '#fff', fontSize: 15, letterSpacing: '0.02em' }}>
+              {site.email}
             </a>
           </div>
 

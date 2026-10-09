@@ -39,3 +39,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# claude code
+/.claude/
+
+# video — served from the R2 bucket (see MEDIA_CDN in lib/site.ts), never committed
+/public/**/*.mp4
+/public/**/*.mov
+/public/**/*.MOV
+
+# wrangler local state
+/.wrangler/
