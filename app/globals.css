@@ -627,26 +627,31 @@ a:hover { color: var(--pc-cyan-bright); }
   border-color: transparent !important;
 }
 
-/* The highlighted tile does grow, though — over its neighbours
-   rather than away from them, so no seam opens. z-index drops only once the
-   tile has shrunk back, or the neighbours would cut across it on the way down.
-   Placed here to win over the rule above; the pointer takes the highlight
-   from .rd-lit the same way it takes the ring. */
+/* The highlighted tile does grow, though — over its neighbours rather than
+   away from them, so no seam opens. Placed here to win over the rule above.
+
+   The stacking takes some care. A tile that is shrinking back must stay above
+   the ones at rest, or they cut across its edges on the way down; but it must
+   already be below the tile now growing, or that one's edges are hidden behind
+   it until it has finished. So a highlighted tile jumps straight to the top,
+   and one losing the highlight steps down from there a level at a time over
+   the length of the shrink, the first step being immediate. */
 .rd-gallery-grid > .rd-card {
   z-index: 0;
-  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), z-index 0s 0.55s;
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), z-index 0.55s steps(2, jump-both);
 }
 .rd-gallery-grid > .rd-lit {
-  z-index: 1;
+  z-index: 3;
   transform: scale(1.06);
-  transition-delay: 0s;
+  transition-duration: 0.55s, 0s;
 }
 /* The caption comes up with it, as it does under the pointer. */
 .rd-gallery-grid > .rd-lit .rd-gallery-cap { opacity: 1; }
+/* The pointer takes the highlight from .rd-lit the same way it takes the ring. */
 @media (hover: hover) {
   .rd-gallery-grid:hover > .rd-lit:not(:hover) .rd-gallery-cap { opacity: 0; }
-  .rd-gallery-grid:hover > .rd-lit:not(:hover) { z-index: 0; transform: none; transition-delay: 0s, 0.55s; }
-  .rd-gallery-grid > .rd-card:hover { z-index: 1; transform: scale(1.06); transition-delay: 0s; }
+  .rd-gallery-grid:hover > .rd-lit:not(:hover) { z-index: 0; transform: none; transition-duration: 0.55s, 0.55s; }
+  .rd-gallery-grid > .rd-card:hover { z-index: 3; transform: scale(1.06); transition-duration: 0.55s, 0s; }
 }
 @media (prefers-reduced-motion: reduce) {
   .rd-gallery-grid > .rd-card { transform: none !important; }
