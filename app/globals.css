@@ -358,6 +358,77 @@ a:hover { color: var(--pc-cyan-bright); }
 }
 .rd-card:focus-visible .rd-gallery-cap { opacity: 1; }
 
+/* The gallery feed — components/GalleryFeed.tsx. On a phone a tapped tile opens
+   every item full screen, one above the other, snapping a slide at a time. */
+.rd-feed { position: fixed; inset: 0; z-index: 120; background: #000; }
+.rd-feed-scroll {
+  height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: none;
+}
+.rd-feed-scroll::-webkit-scrollbar { display: none; }
+/* `always`, so a hard flick moves one slide and not several. */
+.rd-feed-slide { position: relative; height: 100%; scroll-snap-align: start; scroll-snap-stop: always; overflow: hidden; }
+/* The one video, laid over whichever slide is at rest. It takes no touches,
+   so swipes and taps go to the slide beneath it. */
+.rd-feed-video { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; transition: opacity 0.2s ease; }
+.rd-feed-cap {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 80px 76px calc(env(safe-area-inset-bottom, 0px) + 26px) 20px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.75) 100%);
+  pointer-events: none;
+}
+.rd-feed-cap p { margin: 0 0 6px; font: 400 var(--fs-2xs) var(--font-mono); letter-spacing: var(--ls-wide); text-transform: uppercase; color: var(--text-secondary); }
+.rd-feed-cap h3 { margin: 0; font: 700 1.3rem var(--font-techno); font-stretch: 125%; text-transform: uppercase; color: #fff; }
+.rd-feed-count {
+  position: absolute;
+  top: calc(env(safe-area-inset-top, 0px) + 28px);
+  left: 20px;
+  font: 400 12px var(--font-mono);
+  letter-spacing: 0.2em;
+  color: rgba(255, 255, 255, 0.8);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+}
+.rd-feed-btn {
+  position: absolute;
+  right: 16px;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  background: rgba(5, 6, 10, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+.rd-feed-close { top: calc(env(safe-area-inset-top, 0px) + 14px); }
+.rd-feed-sound { bottom: calc(env(safe-area-inset-bottom, 0px) + 22px); }
+.rd-feed-paused {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  margin: -36px 0 0 -36px;
+  padding-left: 5px;
+  background: rgba(5, 6, 10, 0.5);
+  border-radius: 50%;
+  color: #fff;
+  font-size: 26px;
+  pointer-events: none;
+}
+
 /* Home hero footage — app/page.tsx. The scrim keeps the lockup, tagline and
    signup legible over any frame and fades to the page colour at the foot so
    the section below joins without a seam. */

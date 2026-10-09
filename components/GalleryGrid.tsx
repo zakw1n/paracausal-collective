@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import Image from 'next/image';
+import GalleryFeed from '@/components/GalleryFeed';
 import Lightbox from '@/components/Lightbox';
 import MotionImage, { autoplayRefused } from '@/components/MotionImage';
 import StreamVideo from '@/components/StreamVideo';
@@ -126,10 +127,21 @@ export function GalleryMediaTile({ tile, onOpen, className = '' }: { tile: Galle
   );
 }
 
+/** Matches the stylesheet's split for the wall. */
+const PHONE = '(width < 736px)';
+const watchPhone = (notify: () => void) => {
+  const query = window.matchMedia(PHONE);
+  query.addEventListener('change', notify);
+  return () => query.removeEventListener('change', notify);
+};
+
 /**
  * The lightbox over a run of gallery media: `index` is the item of `items`
  * showing, or null when closed. Stepping follows `items` — the order the
  * caller laid its tiles out in — and wraps at either end.
+ *
+ * On a phone it is components/GalleryFeed instead: the same items full screen,
+ * swiped through vertically.
  */
 export function GalleryLightbox({
   items,
@@ -140,10 +152,13 @@ export function GalleryLightbox({
   index: number | null;
   onIndex: (index: number | null) => void;
 }) {
+  const phone = useSyncExternalStore(watchPhone, () => window.matchMedia(PHONE).matches, () => false);
   const active = index === null ? null : items[index];
   const step = (delta: number) => {
     if (index !== null) onIndex((index + delta + items.length) % items.length);
   };
+
+  if (phone) return index === null ? null : <GalleryFeed items={items} start={index} onClose={() => onIndex(null)} />;
 
   return (
     <Lightbox open={active !== null} onClose={() => onIndex(null)} onPrev={() => step(-1)} onNext={() => step(1)}>
