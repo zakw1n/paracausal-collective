@@ -121,12 +121,32 @@ export const featuredClip = galleryClip({
   date: 'Aug 2026',
 });
 
+/** Stream video id for the 15s showreel behind the home page hero, 16:9. */
+export const SHOWREEL_UID = '3eb405dd02c10fbd58da487b6416ed68';
+
+/** Stream video id for the portrait cut of the showreel, 9:16, shown on phones. */
+export const SHOWREEL_MOBILE_UID = '2e1b7e93f1f47eadcab7aac02071b723';
+
+/** A frame of a Stream video as a JPEG, `height` pixels tall. */
+export const streamPoster = (uid: string, height = 1080) =>
+  `https://${STREAM_CUSTOMER}.cloudflarestream.com/${uid}/thumbnails/thumbnail.jpg?time=0s&height=${height}`;
+
 /**
- * The loop behind the home page hero. It is the featured clip's tile encode,
- * which is soft at full-screen size; point `src` and `poster` at a dedicated
- * higher-quality loop here when one exists and nothing else needs to change.
+ * The footage behind the home page hero, played by components/HeroVideo: the
+ * showreel, in a portrait cut below 768px and the landscape one above, so
+ * neither screen shape has to crop the other's framing. Both go through Stream
+ * because one fixed encode sharp enough for a full desktop window would be far
+ * too heavy for a phone; the player picks a rung of the ladder per screen and
+ * connection.
  */
-export const heroLoop = { src: featuredClip.src, poster: featuredClip.poster };
+export const heroLoop = {
+  /** HLS manifest and first frame of the landscape cut. */
+  src: streamHls(SHOWREEL_UID),
+  poster: streamPoster(SHOWREEL_UID),
+  /** The same for the portrait cut. */
+  narrowSrc: streamHls(SHOWREEL_MOBILE_UID),
+  narrowPoster: streamPoster(SHOWREEL_MOBILE_UID, 1280),
+};
 
 const kandalaClip = galleryClip({
   src: cdn('kandala-loop.mp4'),

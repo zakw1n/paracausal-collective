@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import Link from 'next/link';
 import { getImageProps } from 'next/image';
 import Button from '@/components/ds/Button';
@@ -5,6 +6,7 @@ import { eyebrow, sectionHeading, sectionPad } from '@/components/ds/styles';
 import EventCarousel from '@/components/EventCarousel';
 import GalleryStrip from '@/components/GalleryStrip';
 import HeroSignup from '@/components/HeroSignup';
+import HeroVideo from '@/components/HeroVideo';
 import UpcomingEvent from '@/components/UpcomingEvent';
 import { TICKETS_URL, heroLoop, pastEvents, site, upcomingEvent } from '@/lib/site';
 
@@ -28,10 +30,18 @@ export default function Home() {
         }}
       >
         {/* Footage behind the lockup. The poster is the container's background,
-            so it shows while the loop buffers and is all that shows when the
-            visitor prefers reduced motion (the video is hidden in CSS). */}
-        <div className="rd-hero-media" style={{ backgroundImage: `url(${heroLoop.poster})` }}>
-          <video src={heroLoop.src} poster={heroLoop.poster} muted loop autoPlay playsInline aria-hidden="true" />
+            so it shows while the footage buffers and is all that shows when the
+            visitor prefers reduced motion (the video is hidden in CSS). Phones
+            and desktop get different cuts, so there are two posters and the
+            stylesheet picks between them. */}
+        <div
+          className="rd-hero-media"
+          style={{
+            '--hero-poster': `url("${heroLoop.poster}")`,
+            '--hero-poster-narrow': `url("${heroLoop.narrowPoster}")`,
+          } as CSSProperties}
+        >
+          <HeroVideo src={heroLoop.src} narrowSrc={heroLoop.narrowSrc} />
         </div>
 
         <div

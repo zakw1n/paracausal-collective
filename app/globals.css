@@ -101,108 +101,97 @@ a:hover { color: var(--pc-cyan-bright); }
 @keyframes rd-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
 /* Site nav — components/Navbar.tsx
-   A bar of icons along the foot of the screen on a phone; from 768px a rail
-   down the left edge that widens into a labelled drawer on hover. */
-:root {
-  --nav-bar: 50px;   /* height of the phone bar, before the home-indicator inset */
-  --nav-rail: 72px;  /* width of the collapsed rail */
-  /* Width of the rail's open drawer. Scales with the window so it stays in
-     proportion: 232px on a small laptop, up to 336px on a wide display. */
-  --nav-drawer: clamp(232px, 17.5vw, 336px);
-}
-
-/* Page content steps out from under the nav. Hung on :has() rather than a
-   wrapper so routes that suppress the shared chrome (see SiteChrome) get no
-   inset without having to know about it. */
-body:has(.pc-nav) { padding-bottom: calc(var(--nav-bar) + env(safe-area-inset-bottom)); }
-
-.pc-nav {
+   A two-line burger floating in the top right corner at every width, opening
+   a full-screen menu. Nothing is inset for it: it sits over the page. */
+.pc-nav-burger {
   position: fixed;
-  inset: auto 0 0 0;
-  z-index: 80;
+  top: calc(clamp(14px, 2.4vw, 28px) + env(safe-area-inset-top));
+  right: calc(clamp(14px, 2.4vw, 28px) + env(safe-area-inset-right));
+  /* Above the menu, so the same button closes it. */
+  z-index: 91;
   display: flex;
-  height: calc(var(--nav-bar) + env(safe-area-inset-bottom));
-  padding-bottom: env(safe-area-inset-bottom);
-  background: var(--pc-void);
-  border-top: 1px solid var(--border);
-}
-.pc-nav-list { display: flex; flex: 1; }
-.pc-nav-item {
-  flex: 1;
-  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 7px;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  /* A faint disc of blurred page keeps the lines legible over footage and
+     photographs without drawing a box around them. */
+  background: rgba(8, 9, 13, 0.35);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 0;
+  border-radius: 50%;
   color: #fff;
-  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s ease;
 }
+.pc-nav-burger:hover { background: rgba(255, 255, 255, 0.12); }
+.pc-nav-burger:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.pc-nav-burger span {
+  display: block;
+  width: 22px;
+  height: 1.5px;
+  background: currentColor;
+  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+/* The lines sit 8.5px apart centre to centre; each travels half of that to
+   meet in the middle and cross. */
+.pc-nav--open .pc-nav-burger { background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; }
+.pc-nav--open .pc-nav-burger span:first-child { transform: translateY(4.25px) rotate(45deg); }
+.pc-nav--open .pc-nav-burger span:last-child  { transform: translateY(-4.25px) rotate(-45deg); }
+
+.pc-nav-menu {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-end;
+  gap: clamp(28px, 5vh, 48px);
+  padding: 96px clamp(28px, 7vw, 120px) 56px;
+  overflow-y: auto;
+  background: rgba(8, 9, 13, 0.9);
+  -webkit-backdrop-filter: blur(22px);
+  backdrop-filter: blur(22px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0s 0.3s;
+}
+.pc-nav--open .pc-nav-menu { opacity: 1; visibility: visible; transition-delay: 0s; }
+.pc-nav-list { display: flex; flex-direction: column; align-items: flex-end; }
+.pc-nav-item {
+  padding: 0.14em 0;
+  font-family: var(--font-techno);
+  font-stretch: 125%;
+  font-weight: 800;
+  /* Sized to the shorter side: by height so six fit on a laptop, by width so
+     the longest label fits on a phone. */
+  font-size: clamp(1.8rem, min(7.2vh, 12vw), 4.4rem);
+  line-height: 1.08;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: rgba(255, 255, 255, 0.5);
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.4s ease, transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), color 0.2s ease;
+}
+.pc-nav--open .pc-nav-item { opacity: 1; transform: none; }
 /* Restated because the global `a:hover` cyan rule would otherwise win. */
-.pc-nav-item:hover { color: #fff; }
+.pc-nav-item:hover,
+.pc-nav-item--active { color: #fff; }
 .pc-nav-item:focus-visible,
-.pc-nav-brand:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
-.pc-nav-icon { flex-shrink: 0; stroke-width: 2; }
-.pc-nav-item--active .pc-nav-icon { stroke-width: 2.8; }
-/* The phone bar is icons only; each link carries its name in aria-label. */
-.pc-nav-label,
-.pc-nav-brand,
-.pc-nav-foot { display: none; }
-
-@media (min-width: 768px) {
-  /* Inset on both sides, not just the rail's: content stays centred on the
-     window and the rail simply sits over the left margin. Full-bleed sections
-     pull themselves back out (see .rd-hero). */
-  body:has(.pc-nav) { padding-bottom: 0; padding-inline: var(--nav-rail); }
-  .pc-nav {
-    inset: 0 auto 0 0;
-    flex-direction: column;
-    width: var(--nav-rail);
-    height: auto;
-    /* 34px above a 24px mark puts its centre 46px down, and the list below
-       steps in 56px beats (48px rows, 8px apart). */
-    padding: 34px 12px 28px;
-    border-top: 0;
-    /* Clips the labels while collapsed. The drawer opens over the page rather
-       than pushing it, so hovering never reflows what the visitor is reading. */
-    overflow: hidden;
-    transition: width 0.28s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  /* :has(:focus-visible) rather than :focus-within — a clicked link keeps
-     focus, which would pin the drawer open after the pointer has left. */
-  .pc-nav:hover,
-  .pc-nav:has(:focus-visible) { width: var(--nav-drawer); }
-
-  /* Hangs from the mark rather than centring, so the icons hold their place
-     whatever the window height: the first sits 159px down. */
-  .pc-nav-list { flex-direction: column; justify-content: flex-start; gap: 8px; margin-top: 77px; }
-  .pc-nav-brand,
-  .pc-nav-item {
-    flex: none;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 16px;
-    height: 48px;
-    /* 12px either side of a 24px icon fills the collapsed rail's 48px inner
-       width exactly, so icons sit centred and do not move as it opens. */
-    padding: 0 12px;
-    border-radius: 8px;
-    white-space: nowrap;
-    transition: background 0.2s ease;
-  }
-  .pc-nav-brand { height: 24px; }
-  /* The pill marks the pointer, not the page: the current link is told apart
-     by its heavier icon and bold label alone. */
-  .pc-nav-item:hover { background: rgba(255, 255, 255, 0.1); }
-
-  .pc-nav-label {
-    display: block;
-    font-family: var(--font-body);
-    font-size: 1rem;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-  }
-  .pc-nav-item--active .pc-nav-label { font-weight: 700; }
-  .pc-nav:hover .pc-nav-label,
-  .pc-nav:has(:focus-visible) .pc-nav-label { opacity: 1; }
+.pc-nav-foot:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 4px; }
+.pc-nav-foot {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--pc-cyan);
 }
 
 /* Scroll reveal — driven by components/RevealObserver.tsx */
@@ -303,7 +292,8 @@ body:has(.pc-nav) { padding-bottom: calc(var(--nav-bar) + env(safe-area-inset-bo
   .rd-reveal { opacity: 1 !important; transform: none !important; }
   .rd-caption { transform: none !important; transition: opacity 0.3s ease; }
   .rd-card img, .rd-card video, .rd-card:hover img, .rd-card:hover video { transform: none !important; }
-  .pc-nav, .pc-nav-label { transition: none; }
+  .pc-nav-burger span, .pc-nav-menu, .pc-nav-item { transition: none; }
+  .pc-nav-item { transform: none; }
 }
 
 /* ── Redesign layout grids (collapse on narrow viewports) ── */
@@ -317,8 +307,7 @@ body:has(.pc-nav) { padding-bottom: calc(var(--nav-bar) + env(safe-area-inset-bo
    hairline seams, three across, four once the grid itself is 1000px wide.
 
    Below 736px the wall runs edge to edge. Above it the wall is 74% of the
-   window, which is what keeps it clear of the nav rail without being offset
-   for it. The wall is a size container so the column switch can follow the
+   window. The wall is a size container so the column switch can follow the
    grid's own width rather than the window's. */
 .rd-gallery-page { padding: 120px 0 110px; }
 .rd-gallery-wall { container-type: inline-size; }
@@ -366,17 +355,7 @@ body:has(.pc-nav) { padding-bottom: calc(var(--nav-bar) + env(safe-area-inset-bo
 /* Full-screen at every width. The lockup
    centres in whatever height that gives and the signup sits at the foot (see
    app/page.tsx), so the extra height goes to footage, not to dead space. */
-.rd-hero { min-height: 100vh; }
-@media (width < 768px) {
-  /* One full screen, less the bottom bar that sits over the page: the signup
-     lands just above the bar and nothing of the next section shows. */
-  .rd-hero { min-height: calc(100svh - var(--nav-bar) - env(safe-area-inset-bottom)); }
-}
-@media (min-width: 768px) {
-  /* Back out over the body's rail insets so the footage spans the window;
-     the padding keeps the lockup itself clear of the rail. */
-  body:has(.pc-nav) .rd-hero { margin-inline: calc(-1 * var(--nav-rail)); padding-inline: var(--nav-rail); }
-}
+.rd-hero { min-height: 100vh; min-height: 100svh; }
 /* The arrow inside the hero signup field. */
 .rd-signup-go {
   flex: none;
@@ -395,7 +374,11 @@ body:has(.pc-nav) { padding-bottom: calc(var(--nav-bar) + env(safe-area-inset-bo
 .rd-signup-go:focus-visible { outline: 2px solid var(--pc-cyan); outline-offset: -6px; }
 .rd-signup-go:disabled { opacity: .5; cursor: progress; transform: none; }
 
-.rd-hero-media { position: absolute; inset: 0; background: #000 center / cover no-repeat; }
+.rd-hero-media { position: absolute; inset: 0; background: #000 var(--hero-poster) center / cover no-repeat; }
+/* Phones play the portrait cut of the showreel — see components/HeroVideo.tsx. */
+@media (width < 768px) {
+  .rd-hero-media { background-image: var(--hero-poster-narrow); }
+}
 .rd-hero-media video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .rd-hero-media::after {
   content: '';
