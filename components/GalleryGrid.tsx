@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Lightbox from '@/components/Lightbox';
 import MotionImage, { autoplayRefused } from '@/components/MotionImage';
 import StreamVideo from '@/components/StreamVideo';
+import { useRoamingTile } from '@/components/useRoamingTile';
 import { PLACEHOLDER_IMAGE, galleryMedia, galleryPlaceholders } from '@/lib/site';
 import type { GalleryMedia } from '@/lib/site';
 
@@ -209,13 +210,19 @@ function GalleryStub() {
 export default function GalleryGrid() {
   /** Index into `galleryMedia` of the item the lightbox is showing, or null. */
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const { gridRef, lit } = useRoamingTile();
 
   return (
     <>
       <div className="rd-gallery-wall">
-        <div className="rd-gallery-grid">
+        <div ref={gridRef} className="rd-gallery-grid">
           {galleryMedia.map((tile, i) => (
-            <GalleryMediaTile key={tile.kind === 'clip' ? tile.fullSrc : tile.src} tile={tile} onOpen={() => setOpenIndex(i)} />
+            <GalleryMediaTile
+              key={tile.kind === 'clip' ? tile.fullSrc : tile.src}
+              tile={tile}
+              className={i === lit ? 'rd-lit' : ''}
+              onOpen={() => setOpenIndex(i)}
+            />
           ))}
           {Array.from({ length: galleryPlaceholders }, (_, i) => (
             <GalleryStub key={`stub-${i}`} />

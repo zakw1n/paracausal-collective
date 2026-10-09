@@ -431,8 +431,8 @@ a:hover { color: var(--pc-cyan-bright); }
 @container (min-width: 1000px) {
   .rd-gallery-grid--teaser > :nth-child(n + 7) { display: block; }
 }
-/* The tile highlight, on both the wall and the home strip. On the home page
-   components/GalleryStrip.tsx also moves .rd-lit from tile to tile by itself.
+/* The tile highlight, on both the wall and the home strip.
+   components/useRoamingTile.ts also moves .rd-lit from tile to tile by itself.
    Every tile carries the ring and only its opacity changes, so it fades
    between them. A layer of its own for the reason given at .rd-night. */
 .rd-gallery-grid > .rd-card::after {
