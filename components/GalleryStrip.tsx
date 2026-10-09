@@ -11,15 +11,15 @@ const ROAM_MS = 2200;
 /**
  * The home page's slice of the gallery: the same container, grid and tiles as
  * the wall, opening the same lightbox in place. `children` is the section's
- * heading, rendered inside the container so it lines up with the tiles at
- * every width. See `.rd-gallery-grid--teaser` for how it is cut to two rows.
+ * heading and `footer` its button, both rendered inside the container so they
+ * line up with the tiles at every width. See `.rd-gallery-grid--teaser` for how it is cut to two rows.
  *
  * A cyan ring — the one the open poster wears in Recent Nights — wanders from
  * tile to tile at random. It gives way to the pointer (see `.rd-lit` in
  * globals.css), stays put for visitors who prefer reduced motion, and is left
  * out on phones.
  */
-export default function GalleryStrip({ children }: { children: ReactNode }) {
+export default function GalleryStrip({ children, footer }: { children: ReactNode; footer?: ReactNode }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [lit, setLit] = useState<number | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
@@ -54,6 +54,7 @@ export default function GalleryStrip({ children }: { children: ReactNode }) {
             <GalleryMediaTile key={tile.kind === 'clip' ? tile.fullSrc : tile.src} tile={tile} className={i === lit ? 'rd-lit' : ''} onOpen={() => setOpenIndex(i)} />
           ))}
         </div>
+        {footer && <div className="rd-foot-cta">{footer}</div>}
       </div>
 
       <GalleryLightbox items={homeGallery} index={openIndex} onIndex={setOpenIndex} />

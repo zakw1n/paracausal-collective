@@ -421,13 +421,11 @@ a:hover { color: var(--pc-cyan-bright); }
 @media (width < 736px) {
   .rd-strip-head { padding-inline: 20px; }
 }
-/* A section's button sits beside its heading on a wide screen and under its
-   content on a phone, so the heading leads straight into the tiles. It is in
-   the markup twice and each width hides one. */
-.rd-foot-cta { display: none; }
+/* A section's button, under its content. Below 736px the wall is edge to
+   edge, so it keeps a margin of its own like the heading. */
+.rd-foot-cta { padding-top: 28px; }
 @media (width < 736px) {
-  .rd-head-cta { display: none; }
-  .rd-foot-cta { display: block; padding: 28px 20px 0; }
+  .rd-foot-cta { padding-inline: 20px; }
 }
 .rd-gallery-grid--teaser > :nth-child(n + 7) { display: none; }
 @container (min-width: 1000px) {

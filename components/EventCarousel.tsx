@@ -163,7 +163,6 @@ export default function EventCarousel({ events }: { events: SiteEvent[] }) {
             <p style={{ ...eyebrow, margin: '0 0 14px' }}>The archive</p>
             <h2 style={sectionHeading}>RECENT NIGHTS</h2>
           </div>
-          <Link href="/events" className="rd-head-cta"><Button size="md" variant="secondary">All events</Button></Link>
         </div>
 
         <div
@@ -233,8 +232,6 @@ export default function EventCarousel({ events }: { events: SiteEvent[] }) {
           <span>{`${String(active + 1).padStart(2, '0')} / ${current.title} · ${current.date}`}</span>
         </div>
 
-        {/* On a phone the button sits under the strip, not in the heading —
-            see .rd-foot-cta in globals.css. */}
         <div className="rd-foot-cta">
           <Link href="/events"><Button size="md" variant="secondary">All events</Button></Link>
         </div>

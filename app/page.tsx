@@ -96,7 +96,9 @@ export default function Home() {
 
       {/* ── GALLERY STRIP ── */}
       <section className="rd-reveal rd-strip-section">
-        <GalleryStrip>
+        <GalleryStrip
+          footer={<Link href="/gallery"><Button size="md" variant="secondary">Enter the gallery</Button></Link>}
+        >
           <div className="rd-strip-head">
             <div>
               <p style={{ ...eyebrow, margin: '0 0 18px' }}>On the floor</p>
@@ -104,14 +106,8 @@ export default function Home() {
                 MOMENTS FROM<br />THE DARK
               </h2>
             </div>
-            <Link href="/gallery" className="rd-head-cta"><Button size="md" variant="secondary">Enter the gallery</Button></Link>
           </div>
         </GalleryStrip>
-        {/* On a phone the button sits under the tiles, not in the heading —
-            see .rd-foot-cta in globals.css. */}
-        <div className="rd-foot-cta">
-          <Link href="/gallery"><Button size="md" variant="secondary">Enter the gallery</Button></Link>
-        </div>
       </section>
 
       {/* ── RECENT NIGHTS ── */}
