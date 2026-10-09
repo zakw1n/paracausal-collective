@@ -423,7 +423,7 @@ a:hover { color: var(--pc-cyan-bright); }
 }
 /* A section's button, under its content. Below 736px the wall is edge to
    edge, so it keeps a margin of its own like the heading. */
-.rd-foot-cta { padding-top: 28px; }
+.rd-foot-cta { display: flex; justify-content: center; padding-top: 28px; }
 @media (width < 736px) {
   .rd-foot-cta { padding-inline: 20px; }
 }
