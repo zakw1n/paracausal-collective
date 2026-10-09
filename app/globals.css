@@ -53,16 +53,6 @@ body::-webkit-scrollbar {
   display: none;
 }
 
-/* Horizontal scroller (the archive carousel) — same hidden bar as the page,
-   since the row is driven by arrows, drag and snap rather than a track. */
-.rd-scroll-x {
-  scrollbar-width: none;
-}
-
-.rd-scroll-x::-webkit-scrollbar {
-  display: none;
-}
-
 /* ── Typography ── */
 .font-display {
   font-family: 'Bebas Neue', sans-serif;
@@ -312,7 +302,11 @@ a:hover { color: var(--pc-cyan-bright); }
 .rd-gallery-page { padding: 120px 0 110px; }
 .rd-gallery-wall { container-type: inline-size; }
 @media (min-width: 736px) {
-  .rd-gallery-wall { box-sizing: content-box; width: 74vw; max-width: 1457px; padding: 24px 20px 0; margin: 0 auto 30px; }
+  /* 74% of the full-width section, not 74vw. They measure the same, but a vw
+     width has a new computed value at every window size, and a change like
+     that on anything above the content a visitor is looking at makes the
+     browser give up holding their place when the window is resized. */
+  .rd-gallery-wall { box-sizing: content-box; width: 74%; max-width: 1457px; padding: 24px 20px 0; margin: 0 auto 30px; }
 }
 .rd-gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; }
 .rd-gallery-grid > * { aspect-ratio: 3 / 4; }
@@ -396,7 +390,13 @@ a:hover { color: var(--pc-cyan-bright); }
 
    Less padding on top than a normal section: it follows straight on from the
    hero, which brings its own space below the signup. */
-.rd-strip-section { padding: clamp(40px, 6vh, 64px) 0 clamp(70px, 10vh, 120px); }
+/* The space below is margin, not padding. With padding, a window whose top
+   edge sits in that empty band is still "showing" this section and nothing
+   inside it, so on resize the browser pins the page to the section's top and
+   everything below slides. As margin the band belongs to no box and the next
+   section is picked instead. The extra 30px is the wall's own bottom margin,
+   which now collapses into this one. */
+.rd-strip-section { padding: clamp(40px, 6vh, 64px) 0 0; margin-bottom: calc(clamp(70px, 10vh, 120px) + 30px); }
 .rd-strip-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; margin-bottom: 32px; }
 /* Below 736px the wall is edge to edge, so the heading keeps a margin of its own. */
 @media (width < 736px) {
@@ -405,6 +405,195 @@ a:hover { color: var(--pc-cyan-bright); }
 .rd-gallery-grid--teaser > :nth-child(n + 7) { display: none; }
 @container (min-width: 1000px) {
   .rd-gallery-grid--teaser > :nth-child(n + 7) { display: block; }
+}
+/* The tile highlight, on both the wall and the home strip. On the home page
+   components/GalleryStrip.tsx also moves .rd-lit from tile to tile by itself.
+   Every tile carries the ring and only its opacity changes, so it fades
+   between them. A layer of its own for the reason given at .rd-night. */
+.rd-gallery-grid > .rd-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 0 1px rgba(52, 231, 222, 0.5);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+.rd-gallery-grid > .rd-lit::after { opacity: 1; }
+/* With a pointer over the wall the ring follows it instead. */
+@media (hover: hover) {
+  .rd-gallery-grid:hover > .rd-lit::after { opacity: 0; }
+  .rd-gallery-grid > .rd-card:hover::after { opacity: 1; }
+}
+
+/* Recent nights — components/EventCarousel.tsx. A strip of panels, one open
+   at a time and playing its night's flyer reel; the rest wait in greyscale.
+   From the design system's "Recent Nights Wall", option 1b.
+
+   The section sits in the same column as the gallery wall above it — the
+   numbers below are .rd-gallery-wall's — so the two line up at every width:
+   74% of the window from 736px, edge to edge below it. */
+/* Margin below, not padding, for the reason given at .rd-strip-section. */
+.rd-nights-section { padding-top: clamp(70px, 10vh, 120px); margin-bottom: clamp(70px, 10vh, 120px); }
+.rd-nights-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-bottom: 40px; }
+/* A size container, like the gallery wall, so the strip can measure it. */
+.rd-nights-wall { container-type: inline-size; }
+@media (min-width: 736px) {
+  .rd-nights-wall { box-sizing: content-box; width: 74%; max-width: 1457px; padding-inline: 20px; margin-inline: auto; }
+}
+.rd-nights {
+  /* Sized the way the gallery tiles are: purely from the column's width, so
+     the whole strip scales as one piece and every panel is always in view.
+     The height is a length, not an aspect ratio, so the open panel can be
+     sized from it; 60% of the width leaves each closed panel about a fifth
+     of the strip. Capped so a very wide window does not outgrow its height. */
+  --night-h: min(60cqw, 760px);
+  --night-closed: 48px;
+  position: relative;
+  display: flex;
+  gap: 6px;
+  height: var(--night-h);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  /* The strip's height tracks the window, which rules it out as something
+     the browser can hold steady on resize. Opting it out makes the browser
+     hold the heading, the line below or the next section instead. */
+  overflow-anchor: none;
+}
+.rd-nights::-webkit-scrollbar { display: none; }
+/* Closed panels split whatever the open one leaves, but never go under
+   --night-closed: past that the strip scrolls sideways. */
+.rd-night {
+  position: relative;
+  flex: 1 0 var(--night-closed);
+  min-width: 0;
+  overflow: hidden;
+  background: #111;
+  transition: flex-grow 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), flex-basis 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+/* Exactly 9:16, so a reel is never cropped. As one panel opens another
+   closes on the same curve, so their grow factors and their bases each sum
+   to a constant and the panels between them hold still. */
+.rd-night[data-active='true'] { flex: 0 0 calc(var(--night-h) * 9 / 16); }
+/* The ring is a layer of its own because the media covers the panel, and an
+   inset shadow on the panel itself would be painted underneath it. */
+.rd-night[data-active='true']::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  box-shadow: inset 0 0 0 1px rgba(52, 231, 222, 0.5);
+  pointer-events: none;
+}
+.rd-night-link { position: absolute; inset: 0; display: block; color: var(--pc-white); text-decoration: none; }
+.rd-night-link:focus-visible { outline: 2px solid var(--pc-cyan); outline-offset: -2px; }
+.rd-night-media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(0.5) brightness(0.6) contrast(1.05);
+  transform: scale(1.05);
+  transition: filter 0.5s, transform 0.6s;
+}
+.rd-night[data-active='true'] .rd-night-media { filter: none; transform: scale(1); }
+.rd-night-num {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  z-index: 2;
+  font: 400 13px var(--font-mono);
+  letter-spacing: 0.2em;
+  color: var(--pc-fog);
+}
+.rd-night[data-active='true'] .rd-night-num { color: var(--pc-cyan); }
+.rd-night-name {
+  position: absolute;
+  left: 18px;
+  bottom: 22px;
+  z-index: 2;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font: 700 22px var(--font-display);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: opacity 0.3s;
+}
+/* The open panel's flyer carries the name itself, and the line under the
+   strip repeats it. */
+.rd-night[data-active='true'] .rd-night-name { opacity: 0; }
+.rd-night-bar { position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; height: 3px; }
+/* The fill is the auto-advance timer: the component moves on at animationend. */
+.rd-night-bar > span {
+  display: block;
+  height: 100%;
+  background: var(--pc-cyan);
+  transform-origin: left;
+  animation: rd-night-fill var(--night-ms, 4500ms) linear forwards;
+}
+@keyframes rd-night-fill {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+/* Hold while someone is looking or listening. Hover is gated because :hover
+   sticks after a tap on touch screens, and :focus-visible is used because a
+   tap focuses too. */
+@media (hover: hover) {
+  .rd-nights:hover .rd-night-bar > span { animation-play-state: paused; }
+}
+.rd-nights:has(:focus-visible) .rd-night-bar > span,
+.rd-nights[data-hold] .rd-night-bar > span { animation-play-state: paused; }
+.rd-night-sound {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid var(--pc-line-strong);
+  color: var(--pc-mist);
+  font: 700 12px var(--font-mono);
+  cursor: pointer;
+}
+.rd-night-sound[aria-pressed='true'] { color: var(--pc-black); background: var(--pc-cyan); border-color: var(--pc-cyan); }
+.rd-night-sound:focus-visible { outline: 2px solid var(--pc-cyan); outline-offset: 2px; }
+.rd-nights-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 24px;
+  font: 400 13px var(--font-mono);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--pc-mist);
+}
+.rd-nights-foot > :last-child { color: var(--pc-white); }
+/* "Hover to hold" is no use without a pointer that hovers. */
+@media (hover: none) {
+  .rd-nights-hint { display: none; }
+}
+
+@media (width < 736px) {
+  /* Edge to edge, like the gallery wall at this width; the heading and the
+     line below keep a margin. Taller for its width than on a desktop, or the
+     open flyer would be too small to read on a phone. */
+  .rd-nights-head, .rd-nights-foot { padding-inline: 20px; }
+  .rd-nights { --night-h: 90cqw; }
+  .rd-nights-foot { font-size: 11px; letter-spacing: 0.14em; }
+  /* No room for both halves of the line on one row. */
+  .rd-nights-hint { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rd-night, .rd-night-media { transition: none; }
+  .rd-night-bar > span { animation: none; }
 }
 
 /* Tiles in these grids butt together with no gutter, so the shared .rd-card
@@ -415,6 +604,31 @@ a:hover { color: var(--pc-cyan-bright); }
   transform: none;
   box-shadow: none;
   border-color: transparent !important;
+}
+
+/* The highlighted tile does grow, though — over its neighbours
+   rather than away from them, so no seam opens. z-index drops only once the
+   tile has shrunk back, or the neighbours would cut across it on the way down.
+   Placed here to win over the rule above; the pointer takes the highlight
+   from .rd-lit the same way it takes the ring. */
+.rd-gallery-grid > .rd-card {
+  z-index: 0;
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), z-index 0s 0.55s;
+}
+.rd-gallery-grid > .rd-lit {
+  z-index: 1;
+  transform: scale(1.06);
+  transition-delay: 0s;
+}
+/* The caption comes up with it, as it does under the pointer. */
+.rd-gallery-grid > .rd-lit .rd-gallery-cap { opacity: 1; }
+@media (hover: hover) {
+  .rd-gallery-grid:hover > .rd-lit:not(:hover) .rd-gallery-cap { opacity: 0; }
+  .rd-gallery-grid:hover > .rd-lit:not(:hover) { z-index: 0; transform: none; transition-delay: 0s, 0.55s; }
+  .rd-gallery-grid > .rd-card:hover { z-index: 1; transform: scale(1.06); transition-delay: 0s; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rd-gallery-grid > .rd-card { transform: none !important; }
 }
 
 @media (max-width: 860px) {

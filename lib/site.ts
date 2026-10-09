@@ -90,6 +90,12 @@ export const AJITU_UID = '84973006dda46b5ac44f0605cdd1f6d9';
 export const AJITU_II_UID = 'a837fee3cf104c62264b863da2d795e8';
 
 /**
+ * Stream video id for the Xosmo set. The loop and poster files are keyed
+ * `xomso-`, a misspelling that is cheaper to keep than to re-upload.
+ */
+export const XOSMO_UID = '38e21c329a18245a3ea6d840b0042747';
+
+/**
  * The clip fronting both the home-page gallery teaser and the gallery grid.
  * The two lay it out differently — the home tile runs title and date together,
  * the grid stacks them — so both parts are exposed alongside the joined form.
@@ -103,6 +109,8 @@ export type GalleryClip = {
   poster: string;
   title: string;
   date: string;
+  /** CSS aspect ratio of the full clip when it was filmed upright; 16:9 if absent. */
+  upright?: string;
   /** Title and date joined, for the single-line home-page tile. */
   caption: string;
 };
@@ -127,9 +135,9 @@ export const SHOWREEL_UID = '3eb405dd02c10fbd58da487b6416ed68';
 /** Stream video id for the portrait cut of the showreel, 9:16, shown on phones. */
 export const SHOWREEL_MOBILE_UID = '2e1b7e93f1f47eadcab7aac02071b723';
 
-/** A frame of a Stream video as a JPEG, `height` pixels tall. */
-export const streamPoster = (uid: string, height = 1080) =>
-  `https://${STREAM_CUSTOMER}.cloudflarestream.com/${uid}/thumbnails/thumbnail.jpg?time=0s&height=${height}`;
+/** The frame `time` seconds into a Stream video as a JPEG, `height` pixels tall. */
+export const streamPoster = (uid: string, height = 1080, time = 0) =>
+  `https://${STREAM_CUSTOMER}.cloudflarestream.com/${uid}/thumbnails/thumbnail.jpg?time=${time}s&height=${height}`;
 
 /**
  * The footage behind the home page hero, played by components/HeroVideo: the
@@ -176,7 +184,49 @@ const ajituIIClip = galleryClip({
   date: 'Aug 2026',
 });
 
-export const galleryClips: GalleryClip[] = [featuredClip, kandalaClip, ajituClip, ajituIIClip];
+const xosmoClip = galleryClip({
+  src: cdn('xomso-loop.mp4'),
+  fullSrc: streamHls(XOSMO_UID),
+  poster: '/gallery/xomso-poster.jpg',
+  title: 'XOSMO',
+  date: 'Aug 2026',
+});
+
+/** Stream video ids for the Zdlck and Skorgen set, the Gray Matter set and the Llandudno beach edit. */
+export const SKORGEN_UID = 'b8650b34558751ea8d850375ae2bb39f';
+export const GRAY_MATTER_UID = '820abef32d102c4115cf767257fd1447';
+export const LLANDUDNO_UID = '0aa293444ad86a2d4153f4125dfebd04';
+
+const skorgenClip = galleryClip({
+  src: cdn('skorgen-loop.mp4'),
+  fullSrc: streamHls(SKORGEN_UID),
+  poster: '/gallery/skorgen-poster.jpg',
+  title: 'ZDLCK · SKORGEN',
+  date: 'Apr 2026',
+});
+
+/** Filmed upright, like the Llandudno edit below; the lightbox sizes itself to `upright`. */
+const grayMatterClip = galleryClip({
+  src: cdn('graymatter-loop.mp4'),
+  fullSrc: streamHls(GRAY_MATTER_UID),
+  poster: '/gallery/graymatter-poster.jpg',
+  title: 'GRAY MATTER',
+  date: 'Apr 2026',
+  upright: '9 / 16',
+});
+
+const llandudnoClip = galleryClip({
+  src: cdn('llandudno-loop.mp4'),
+  fullSrc: streamHls(LLANDUDNO_UID),
+  poster: '/gallery/llandudno-poster.jpg',
+  title: 'LLANDUDNO',
+  date: 'Nov 2024',
+  upright: '2 / 3',
+});
+
+export const galleryClips: GalleryClip[] = [
+  featuredClip, kandalaClip, ajituClip, ajituIIClip, xosmoClip, skorgenClip, grayMatterClip, llandudnoClip,
+];
 
 /** A still from the bucket, shown as a grid tile and opened full-size on click. */
 export type GalleryPhoto = {
@@ -331,6 +381,12 @@ export type SiteEvent = {
   banner: string;
   genre: string;
   status: 'upcoming' | 'past';
+  /**
+   * Stream video id of the night's animated flyer, a 9:16 reel with sound.
+   * Plays in the Recent Nights strip on the home page; nights without one
+   * show their banner there instead.
+   */
+  reel?: string;
   /** Upcoming nights only. */
   time?: string;
   meta?: string;
@@ -344,6 +400,7 @@ const afterlightV: SiteEvent = {
   venue: 'EVØL Nightclub, 69 Hope St',
   address: 'EVØL Nightclub, 69 Hope St, Gardens, Cape Town',
   banner: '/events/afterlight-v-banner.jpeg',
+  reel: 'a5b318418a022f1ea38deceb4db0feda',
   genre: 'Hi-tech',
   status: 'past',
   time: '21:00 till late',
@@ -356,10 +413,10 @@ const afterlightV: SiteEvent = {
  */
 export const events: SiteEvent[] = [
   afterlightV,
-  { id: 'afterlight-iv',  title: 'AFTERLIGHT IV',  date: 'NOV 2025', venue: 'Cape Town',          banner: '/events/afterlight-iv-banner.webp',  genre: 'Hi-tech',   status: 'past' },
-  { id: 'afterlight-iii', title: 'AFTERLIGHT III', date: 'JUN 2025', venue: 'Cape Town',          banner: '/events/afterlight-iii-banner.jpeg', genre: 'Dark psy',  status: 'past' },
-  { id: 'afterlight-ii',  title: 'AFTERLIGHT II',  date: 'FEB 2025', venue: 'Cape Town',          banner: '/events/afterlight-ii-banner.jpeg',  genre: 'Forest',    status: 'past' },
-  { id: 'afterlight-i',   title: 'AFTERLIGHT I',   date: 'OCT 2024', venue: 'Cape Town',          banner: '/events/afterlight-i-banner.png',    genre: 'Psytrance', status: 'past' },
+  { id: 'afterlight-iv',  title: 'AFTERLIGHT IV',  date: '02.04.26', venue: 'Cape Town',          banner: '/events/afterlight-iv-banner.webp', reel: '137342d0745c1fd51977966a8790c484',  genre: 'Hi-tech',   status: 'past' },
+  { id: 'afterlight-iii', title: 'AFTERLIGHT III', date: '19.12.25', venue: 'Cape Town',          banner: '/events/afterlight-iii-banner.jpeg', reel: '38773c9945d9eebbd4a8bba01334a220', genre: 'Dark psy',  status: 'past' },
+  { id: 'afterlight-ii',  title: 'AFTERLIGHT II',  date: '29.08.25', venue: 'Cape Town',          banner: '/events/afterlight-ii-banner.jpeg', reel: '57ae1a23d5a691025144339042f0afce',  genre: 'Forest',    status: 'past' },
+  { id: 'afterlight-i',   title: 'AFTERLIGHT I',   date: '18.07.25', venue: 'Cape Town',          banner: '/events/afterlight-i-banner.png', reel: '5bfa421dd548bf163e9046babe526bf5',    genre: 'Psytrance', status: 'past' },
   { id: 'boilah-room',    title: '“BØILAH ROOM”',  date: '05.12.24', venue: 'Hexagon Night Club', banner: '/events/boilah-room-banner.jpeg',    genre: 'Hi-tech',   status: 'past' },
 ];
 
@@ -378,6 +435,15 @@ export const pastEvents: SiteEvent[] = events.filter((event) => event.status ===
 
 const eventsById = new Map(events.map((event) => [event.id, event]));
 
+/**
+ * The nights in the home page's Recent Nights strip, newest first. Chosen by
+ * hand rather than taken from `pastEvents`: the strip is built around the
+ * flyer reels, and it reads best as a short run of them.
+ */
+export const recentNights: SiteEvent[] = ['afterlight-v', 'afterlight-iv', 'afterlight-iii', 'afterlight-ii']
+  .map((id) => eventsById.get(id))
+  .filter((event): event is SiteEvent => event !== undefined);
+
 export function eventById(id: string): SiteEvent | undefined {
   return eventsById.get(id);
 }
@@ -393,8 +459,8 @@ export const galleryStubs = [
 export type GalleryMedia = ({ kind: 'clip' } & GalleryClip) | ({ kind: 'photo' } & GalleryPhoto);
 
 /**
- * Every gallery item in display order — the wall, the home page strip and the
- * lightbox all follow it. Photos and clips are dealt alternately, photo first,
+ * Every gallery item in display order — the wall and its lightbox follow it;
+ * the home page strip has its own pick, `homeGallery`. Photos and clips are dealt alternately, photo first,
  * so no two clips sit side by side; if one kind outnumbers the other its
  * surplus trails at the end, the only place like tiles can then meet.
  */
@@ -405,6 +471,28 @@ export const galleryMedia: GalleryMedia[] = (() => {
     if (galleryClips[i]) out.push({ kind: 'clip', ...galleryClips[i] });
   }
   return out;
+})();
+
+/**
+ * The home page's gallery tiles, picked by hand rather than taken from the head
+ * of the wall, followed by everything else so the lightbox opened from the
+ * strip can still step through the whole gallery. The first `homeGalleryCount`
+ * are the ones shown.
+ */
+export const homeGalleryCount = 8;
+export const homeGallery: GalleryMedia[] = (() => {
+  const shown: GalleryMedia[] = [
+    { kind: 'clip', ...llandudnoClip },
+    { kind: 'clip', ...featuredClip },
+    { kind: 'photo', ...smokePhoto },
+    { kind: 'clip', ...kandalaClip },
+    { kind: 'photo', ...boisPhoto },
+    { kind: 'clip', ...ajituClip },
+    { kind: 'clip', ...skorgenClip },
+    { kind: 'clip', ...xosmoClip },
+  ];
+  const taken = new Set(shown.map((item) => item.src));
+  return [...shown, ...galleryMedia.filter((item) => !taken.has(item.src))];
 })();
 
 /**

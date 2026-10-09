@@ -61,5 +61,10 @@ export const sectionHeading = {
  * Vertical rhythm + gutters for a homepage section. A plain string rather than
  * a style object: it is only ever a `padding` value, and sections spread their
  * own layout around it.
+ *
+ * The gutter is 5% of the section's own width, not 5vw. On a full-width
+ * section they are equal, but a vw padding has a new computed value at every
+ * window size, which stops the browser holding a visitor's place in the page
+ * when they resize the window.
  */
-export const sectionPad = 'clamp(70px,10vh,120px) clamp(20px,5vw,64px)';
+export const sectionPad = 'clamp(70px,10vh,120px) clamp(20px,5%,64px)';

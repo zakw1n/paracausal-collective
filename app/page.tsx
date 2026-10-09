@@ -8,7 +8,7 @@ import GalleryStrip from '@/components/GalleryStrip';
 import HeroSignup from '@/components/HeroSignup';
 import HeroVideo from '@/components/HeroVideo';
 import UpcomingEvent from '@/components/UpcomingEvent';
-import { TICKETS_URL, heroLoop, pastEvents, site, upcomingEvent } from '@/lib/site';
+import { TICKETS_URL, heroLoop, recentNights, site, upcomingEvent } from '@/lib/site';
 
 /** The hero lockup, 3:1, in its two cuts; see the <picture> that uses them. */
 const heroLogoSize = { alt: site.name, width: 1040, height: 347, sizes: '(max-width: 1130px) 92vw, 1040px' };
@@ -110,23 +110,26 @@ export default function Home() {
       </section>
 
       {/* ── RECENT NIGHTS ── */}
-      <EventCarousel events={pastEvents} />
+      <EventCarousel events={recentNights} />
 
-      {/* ── NEXT UPCOMING EVENT ── */}
-      <section className="rd-reveal" style={{ padding: sectionPad }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 32 }}>
-            <p style={eyebrow}>{upcomingEvent ? 'Next upcoming event' : 'Upcoming'}</p>
-            <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
+      {/* ── NEXT UPCOMING EVENT ── only while a night is on sale; with nothing
+          scheduled the section is left out rather than filled with a placeholder. */}
+      {upcomingEvent && (
+        <section className="rd-reveal" style={{ padding: sectionPad }}>
+          <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 32 }}>
+              <p style={eyebrow}>Next upcoming event</p>
+              <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
+            </div>
+            <UpcomingEvent />
           </div>
-          <UpcomingEvent />
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* ── CLOSING CTA ── */}
       <section
         className="rd-reveal"
-        style={{ position: 'relative', padding: 'clamp(90px,14vh,170px) clamp(20px,5vw,64px)', textAlign: 'center', borderTop: '1px solid var(--border)', overflow: 'hidden' }}
+        style={{ position: 'relative', padding: 'clamp(90px,14vh,170px) clamp(20px,5%,64px)', textAlign: 'center', borderTop: '1px solid var(--border)', overflow: 'hidden' }}
       >
         <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'radial-gradient(90% 120% at 50% 100%, rgba(139,92,246,0.18) 0%, transparent 60%)' }} />
         <div style={{ position: 'relative', maxWidth: 800, margin: '0 auto' }}>

@@ -133,7 +133,9 @@ export function GalleryLightbox({
   return (
     <Lightbox open={active !== null} onClose={() => onIndex(null)} onPrev={() => step(-1)} onNext={() => step(1)}>
       {active?.kind === 'clip' && (
-        <div style={{ aspectRatio: '16 / 9' }}>
+        // An upright clip is sized by height instead, so it is not cropped to
+        // a 16:9 window; `contain` covers a phone too narrow for that height.
+        <div style={active.upright ? { aspectRatio: active.upright, height: '85vh', maxWidth: '100%', margin: '0 auto' } : { aspectRatio: '16 / 9' }}>
           {/* Lightbox only mounts its children when open, so the manifest and the
               hls.js chunk are both requested on click rather than page load.
               Keying on the clip forces a fresh <video> per clip, so stepping
@@ -142,7 +144,7 @@ export function GalleryLightbox({
             key={active.fullSrc}
             src={active.fullSrc}
             poster={active.poster}
-            style={{ width: '100%', height: '100%', objectFit: 'cover', background: '#000' }}
+            style={{ width: '100%', height: '100%', objectFit: active.upright ? 'contain' : 'cover', background: '#000' }}
           />
         </div>
       )}
