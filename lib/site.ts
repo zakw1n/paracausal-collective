@@ -225,12 +225,13 @@ const grayMatterClip = galleryClip({
 });
 
 const llandudnoClip = galleryClip({
-  src: cdn('llandudno-loop.mp4'),
+  // v2: the first cut was encoded at 2:3 and squashed the 9:16 footage.
+  src: cdn('llandudno-loop-v2.mp4'),
   fullSrc: streamHls(LLANDUDNO_UID),
   poster: '/gallery/llandudno-poster.jpg',
   title: 'LLANDUDNO',
   date: 'Nov 2024',
-  upright: '2 / 3',
+  upright: '9 / 16',
 });
 
 export const galleryClips: GalleryClip[] = [
