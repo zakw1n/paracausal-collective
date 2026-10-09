@@ -384,7 +384,8 @@ a:hover { color: var(--pc-cyan-bright); }
 @media (width < 768px) {
   .rd-hero-media { background-image: var(--hero-poster-narrow); }
 }
-.rd-hero-media video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+/* The img is components/MotionImage, standing in where autoplay is refused. */
+.rd-hero-media video, .rd-hero-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .rd-hero-media::after {
   content: '';
   position: absolute;
@@ -471,6 +472,8 @@ a:hover { color: var(--pc-cyan-bright); }
      the browser can hold steady on resize. Opting it out makes the browser
      hold the heading, the line below or the next section instead. */
   overflow-anchor: none;
+  /* Sideways swipes belong to the component, which steps through the nights. */
+  touch-action: pan-y;
 }
 .rd-nights::-webkit-scrollbar { display: none; }
 /* Closed panels split whatever the open one leaves, but never go under

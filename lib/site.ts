@@ -154,7 +154,16 @@ export const heroLoop = {
   /** The same for the portrait cut. */
   narrowSrc: streamHls(SHOWREEL_MOBILE_UID),
   narrowPoster: streamPoster(SHOWREEL_MOBILE_UID, 1280),
+  /** Plain mp4 copies of both cuts, for components/MotionImage. */
+  still: cdn('still/showreel.mp4'),
+  narrowStill: cdn('still/showreel-mobile.mp4'),
 };
+
+/**
+ * Plain mp4 copy of a flyer reel, for components/MotionImage. One has to be
+ * encoded and uploaded as `still/reel-<uid>.mp4` for each reel in the strip.
+ */
+export const reelStill = (uid: string) => cdn(`still/reel-${uid}.mp4`);
 
 const kandalaClip = galleryClip({
   src: cdn('kandala-loop.mp4'),

@@ -5,8 +5,9 @@ import type { CSSProperties } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import Button from '@/components/ds/Button';
+import MotionImage, { autoplayRefused } from '@/components/MotionImage';
 import { eyebrow, sectionHeading } from '@/components/ds/styles';
-import { streamHls, streamPoster } from '@/lib/site';
+import { reelStill, streamHls, streamPoster } from '@/lib/site';
 import type { SiteEvent } from '@/lib/site';
 
 /** How long the strip rests on a night before opening the next. */
@@ -34,11 +35,17 @@ function Reel({ uid, active, muted }: { uid: string; active: boolean; muted: boo
   const [armed, setArmed] = useState(active);
   if (active && !armed) setArmed(true);
 
+  // Whether the reel is being shown as an image because the browser refused
+  // to autoplay it — see components/MotionImage. Turning the sound on is a
+  // tap, which lifts the refusal, so that goes back to the real video.
+  const [stand, setStand] = useState(false);
+  const refused = (error: unknown) => { if (autoplayRefused(error)) setStand(true); };
+
   useEffect(() => {
     wanted.current = active;
     const video = ref.current;
     if (!video) return;
-    if (active) video.play().catch(() => {});
+    if (active) video.play().catch(refused);
     else video.pause();
   }, [active]);
 
@@ -54,7 +61,7 @@ function Reel({ uid, active, muted }: { uid: string; active: boolean; muted: boo
     import('hls.js').then(({ default: Hls }) => {
       if (cancelled || !video.isConnected) return;
       // The panel may have closed again while hls.js was loading.
-      const start = () => { if (wanted.current) video.play().catch(() => {}); };
+      const start = () => { if (wanted.current) video.play().catch(refused); };
 
       if (!Hls.isSupported()) {
         if (!video.canPlayType('application/vnd.apple.mpegurl')) return;
@@ -96,22 +103,29 @@ function Reel({ uid, active, muted }: { uid: string; active: boolean; muted: boo
   // React only writes `muted` as an attribute on mount, so later changes go
   // through the property.
   useEffect(() => {
-    if (ref.current) ref.current.muted = muted;
+    const video = ref.current;
+    if (!video) return;
+    video.muted = muted;
+    if (!muted && wanted.current) video.play().then(() => setStand(false), () => {});
   }, [muted]);
 
   return (
-    <video
-      ref={ref}
-      className="rd-night-media"
-      // Lets components/AutoplayNudge restart it if the browser refused play().
-      data-playing={active}
-      poster={streamPoster(uid, 1280, POSTER_AT)}
-      muted
-      loop
-      playsInline
-      preload="none"
-      aria-hidden="true"
-    />
+    <>
+      <video
+        ref={ref}
+        className="rd-night-media"
+        // Lets components/AutoplayNudge restart it if the browser refused play().
+        data-playing={active}
+        poster={streamPoster(uid, 1280, POSTER_AT)}
+        muted
+        loop
+        playsInline
+        preload="none"
+        aria-hidden="true"
+        data-still={stand ? '' : undefined}
+      />
+      {stand && active && <MotionImage src={reelStill(uid)} className="rd-night-media" onError={() => setStand(false)} />}
+    </>
   );
 }
 
@@ -132,6 +146,8 @@ export default function EventCarousel({ events }: { events: SiteEvent[] }) {
   const [active, setActive] = useState(0);
   const [sound, setSound] = useState(false);
   const stripRef = useRef<HTMLDivElement>(null);
+  /** Where a touch on the strip began, to tell a swipe from a tap or a scroll. */
+  const touch = useRef<{ x: number; y: number } | null>(null);
 
   // Where the strip overflows, bring the open panel to its leading edge. The
   // target is worked out, not measured: the panels are still mid-transition
@@ -164,6 +180,19 @@ export default function EventCarousel({ events }: { events: SiteEvent[] }) {
         <div
           ref={stripRef}
           className="rd-nights"
+          // A sideways swipe steps to the next or previous night. The
+          // stylesheet gives the strip `touch-action: pan-y`, so the browser
+          // keeps vertical scrolling and leaves horizontal movement to this.
+          onTouchStart={(e) => { touch.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }; }}
+          onTouchEnd={(e) => {
+            const from = touch.current;
+            touch.current = null;
+            if (!from) return;
+            const dx = e.changedTouches[0].clientX - from.x;
+            const dy = e.changedTouches[0].clientY - from.y;
+            if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy)) return;
+            setActive((n) => (n + (dx < 0 ? 1 : -1) + events.length) % events.length);
+          }}
           // Sound holds the strip, or a reel would be cut off mid-listen.
           data-hold={sound && current.reel ? 'true' : undefined}
           style={{ '--night-ms': `${ADVANCE_MS}ms`, '--night-count': events.length } as CSSProperties}

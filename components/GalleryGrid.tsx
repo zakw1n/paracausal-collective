@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Lightbox from '@/components/Lightbox';
+import MotionImage, { autoplayRefused } from '@/components/MotionImage';
 import StreamVideo from '@/components/StreamVideo';
 import { PLACEHOLDER_IMAGE, galleryMedia, galleryPlaceholders } from '@/lib/site';
 import type { GalleryMedia } from '@/lib/site';
@@ -45,6 +46,8 @@ function Caption({ date, title }: { date: string; title: string }) {
 function LoopVideo({ src, poster }: { src: string; poster: string }) {
   const ref = useRef<HTMLVideoElement>(null);
   const [near, setNear] = useState(false);
+  /** Whether the loop is being shown as an image, autoplay having been refused. */
+  const [stand, setStand] = useState(false);
 
   useEffect(() => {
     const el = ref.current;
@@ -61,7 +64,19 @@ function LoopVideo({ src, poster }: { src: string; poster: string }) {
     return () => io.disconnect();
   }, []);
 
-  return <video ref={ref} src={near ? src : undefined} poster={poster} muted loop autoPlay playsInline style={fillStyle} />;
+  // Where the browser refuses to autoplay, the same file is shown through an
+  // image instead — see components/MotionImage.
+  useEffect(() => {
+    if (!near) return;
+    ref.current?.play().catch((error) => { if (autoplayRefused(error)) setStand(true); });
+  }, [near]);
+
+  return (
+    <>
+      <video ref={ref} src={near ? src : undefined} poster={poster} muted loop autoPlay playsInline data-still={stand ? '' : undefined} style={fillStyle} />
+      {stand && <MotionImage src={src} style={fillStyle} onError={() => setStand(false)} />}
+    </>
+  );
 }
 
 /**

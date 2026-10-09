@@ -10,13 +10,17 @@ import { useEffect } from 'react';
  * Safari draws over such a video (see "Blocked autoplay" in globals.css), so
  * until then the poster simply stands in.
  *
+ * This is the last resort. The footage on the home page first falls back to
+ * components/MotionImage, which does play on load, and marks its video
+ * `data-still` so it is skipped here.
+ *
  * Covers anything with `autoplay`, plus video that marks itself
  * `data-playing="true"` because it is started from script instead.
  */
 export default function AutoplayNudge() {
   useEffect(() => {
     const nudge = () => {
-      document.querySelectorAll<HTMLVideoElement>('video[autoplay], video[data-playing="true"]').forEach((video) => {
+      document.querySelectorAll<HTMLVideoElement>('video[autoplay]:not([data-still]), video[data-playing="true"]:not([data-still])').forEach((video) => {
         if (video.paused && video.muted) video.play().catch(() => {});
       });
     };

@@ -41,7 +41,7 @@ export default function Home() {
             '--hero-poster-narrow': `url("${heroLoop.narrowPoster}")`,
           } as CSSProperties}
         >
-          <HeroVideo src={heroLoop.src} narrowSrc={heroLoop.narrowSrc} />
+          <HeroVideo src={heroLoop.src} narrowSrc={heroLoop.narrowSrc} still={heroLoop.still} narrowStill={heroLoop.narrowStill} />
         </div>
 
         <div

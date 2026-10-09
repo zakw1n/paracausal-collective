@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
+import MotionImage, { autoplayRefused } from '@/components/MotionImage';
 
 /** Matches the stylesheet's phone/desktop split; see app/globals.css. */
 const PHONE = '(width < 768px)';
@@ -28,20 +29,33 @@ const overStyle: CSSProperties = { opacity: 0, transition: `opacity ${FADE}s lin
  * attached after hydration — the poster behind the video covers the gap. See
  * components/StreamVideo.tsx for why hls.js is tried before native HLS.
  *
+ * Where the browser refuses to autoplay (an iPhone in Low Power Mode), the
+ * same footage is shown through components/MotionImage instead, from a plain
+ * mp4 of the cut with the dissolve baked into its loop.
+ *
  * There is no `poster` attribute: it cannot vary by viewport, and the
  * container's background already shows the right frame through the empty video.
  */
 export default function HeroVideo({
   src,
   narrowSrc,
+  still,
+  narrowStill,
 }: {
   /** HLS manifest for the landscape cut — see `streamHls()` in lib/site.ts. */
   src: string;
   /** HLS manifest for the portrait cut, played on phones. */
   narrowSrc: string;
+  /** Plain mp4 of each cut, shown as an image where autoplay is refused. */
+  still: string;
+  narrowStill: string;
 }) {
   const underRef = useRef<HTMLVideoElement>(null);
   const overRef = useRef<HTMLVideoElement>(null);
+  /** The mp4 standing in for the video, once autoplay has been refused. */
+  const [stand, setStand] = useState<string | null>(null);
+  /** Puts the players back to work if the stand-in cannot be shown. */
+  const resume = useRef<() => void>(() => {});
 
   useEffect(() => {
     const under = underRef.current;
@@ -53,7 +67,15 @@ export default function HeroVideo({
     const phone = window.matchMedia(PHONE).matches;
     const manifest = phone ? narrowSrc : src;
 
-    const players: { destroy: () => void }[] = [];
+    const players: { destroy: () => void; stopLoad: () => void; startLoad: () => void }[] = [];
+    // Autoplay refused: hand over to the image and stop buffering footage
+    // that will not be shown.
+    const refused = (error: unknown) => {
+      if (cancelled || !autoplayRefused(error)) return;
+      players.forEach((p) => p.stopLoad());
+      setStand(phone ? narrowStill : still);
+    };
+    resume.current = () => players.forEach((p) => p.startLoad());
     let cancelled = false;
     let frame = 0;
     let swap = 0;
@@ -109,7 +131,7 @@ export default function HeroVideo({
         if (!Hls.isSupported()) {
           if (!video.canPlayType('application/vnd.apple.mpegurl')) return;
           video.src = manifest;
-          if (autoplay) video.play().catch(() => {});
+          if (autoplay) video.play().catch(refused);
           else video.load();
           return;
         }
@@ -127,7 +149,7 @@ export default function HeroVideo({
         instance.attachMedia(video);
         if (autoplay) {
           instance.on(Hls.Events.MANIFEST_PARSED, () => {
-            video.play().catch(() => {});
+            video.play().catch(refused);
           });
         }
         players.push(instance);
@@ -146,12 +168,15 @@ export default function HeroVideo({
       clearTimeout(swap);
       players.forEach((p) => p.destroy());
     };
-  }, [src, narrowSrc]);
+  }, [src, narrowSrc, still, narrowStill]);
 
   return (
     <>
-      <video ref={underRef} muted loop autoPlay playsInline aria-hidden="true" />
+      {/* `data-still` tells components/AutoplayNudge to leave these alone
+          while the image is standing in for them. */}
+      <video ref={underRef} muted loop autoPlay playsInline aria-hidden="true" data-still={stand ? '' : undefined} />
       <video ref={overRef} muted loop playsInline aria-hidden="true" style={overStyle} />
+      {stand && <MotionImage src={stand} onError={() => { setStand(null); resume.current(); }} />}
     </>
   );
 }
