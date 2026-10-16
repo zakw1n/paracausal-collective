@@ -104,9 +104,14 @@ export type GalleryClip = {
   /** Silent autoplay loop. Plays on page load, so keep it under ~1MB. */
   src: string;
   /**
-   * The same loop at about a third of the size, played on phones. Every loop
-   * needs one, uploaded under `sm/` with the same file name: 400px tall for
-   * landscape footage, 360px wide for upright, CRF 32.
+   * The loop cut for a phone tile, played below 736px. Every loop needs one,
+   * uploaded under `tile/` with the same file name: the 3:4 centre crop that
+   * `cover` shows in the tile, at most 540px wide, made from the loop above
+   * with `hqdn3d=1.5:1.5:3:3`, CRF 29, `-tune film`. A phone grid runs two
+   * across, so a tile is about 645×860 device pixels on a 3× screen; the old
+   * `sm/` cuts (400px tall, CRF 32) showed only a 300×400 window of that and
+   * were upscaled past twice. Keys are cached `immutable`, so a recut takes a
+   * new prefix rather than overwriting.
    */
   smallSrc: string;
   /** Full clip, played in the lightbox. Adaptive, and fetched only on click. */
@@ -124,7 +129,7 @@ export type GalleryClip = {
 /** Builds a clip, deriving the joined caption so the two never drift apart. */
 const galleryClip = (c: Omit<GalleryClip, 'caption' | 'smallSrc'>): GalleryClip => ({
   ...c,
-  smallSrc: c.src.replace(`${MEDIA_CDN}/`, `${MEDIA_CDN}/sm/`),
+  smallSrc: c.src.replace(`${MEDIA_CDN}/`, `${MEDIA_CDN}/tile/`),
   caption: `${c.title} · ${c.date}`,
 });
 

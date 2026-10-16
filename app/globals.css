@@ -361,7 +361,11 @@ a:hover { color: var(--pc-cyan-bright); }
 /* The gallery feed — components/GalleryFeed.tsx. On a phone a tapped tile opens
    every item full screen, one above the other, snapping a slide at a time. */
 .rd-feed { position: fixed; inset: 0; z-index: 120; background: #000; }
+/* `isolate` keeps the video and captions' stacking inside the scroller, so
+   the count and buttons laid after it stay on top. */
 .rd-feed-scroll {
+  position: relative;
+  isolation: isolate;
   height: 100%;
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -371,11 +375,19 @@ a:hover { color: var(--pc-cyan-bright); }
 .rd-feed-scroll::-webkit-scrollbar { display: none; }
 /* `always`, so a hard flick moves one slide and not several. */
 .rd-feed-slide { position: relative; height: 100%; scroll-snap-align: start; scroll-snap-stop: always; overflow: hidden; }
-/* The one video, laid over whichever slide is at rest. It takes no touches,
-   so swipes and taps go to the slide beneath it. */
-.rd-feed-video { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; transition: opacity 0.2s ease; }
+/* The one video, laid over whichever slide is at rest — `top` is set inline
+   to that slide's offset, so it scrolls with it. It takes no touches, so
+   swipes and taps go to the slide beneath it. */
+.rd-feed-video { position: absolute; left: 0; z-index: 1; width: 100%; height: 100%; pointer-events: none; }
+/* Stills and video show the whole frame. An upright clip fills a portrait
+   screen instead, but goes back to the whole frame once the phone is turned. */
+.rd-feed-media, .rd-feed-video { object-fit: contain; }
+@media (orientation: portrait) {
+  .rd-feed-media--upright { object-fit: cover; }
+}
 .rd-feed-cap {
   position: absolute;
+  z-index: 2;
   inset: auto 0 0 0;
   padding: 80px 76px calc(env(safe-area-inset-bottom, 0px) + 26px) 20px;
   background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.75) 100%);

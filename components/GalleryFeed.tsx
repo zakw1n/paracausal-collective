@@ -4,21 +4,27 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import type { GalleryMedia } from '@/lib/site';
 
-/** How far, in slides, the feed may sit from a slide and still count as resting on it. */
-const SETTLED = 0.03;
+/** How long the feed must go without scrolling, in ms, to count as at rest where `scrollend` is missing. */
+const SETTLE_MS = 120;
 
 /**
  * The gallery on a phone, once a tile is tapped: every item full screen, one
  * above the other, moved through by swiping up and down the way a reels feed
  * is. components/GalleryGrid shows this in place of the lightbox below 736px.
  *
- * The slides themselves only hold stills. There is a single `<video>`, fixed
- * over the feed, that plays whichever clip the feed has come to rest on and
- * hides while it is moving. One element rather than one per slide because a
- * phone only lets video play with sound once the visitor has started that very
- * element by hand — a fresh element per slide would fall silent at every swipe.
- * It ignores touches, so swipes reach the feed underneath; a tap on a slide
- * pauses and resumes it.
+ * The slides themselves only hold stills. There is a single `<video>`, laid
+ * inside the scroller on top of whichever slide the feed last came to rest on,
+ * so it travels with that slide under the finger rather than vanishing as a
+ * swipe begins. One element rather than one per slide because a phone only
+ * lets video play with sound once the visitor has started that very element by
+ * hand — a fresh element per slide would fall silent at every swipe. It ignores
+ * touches, so swipes reach the feed underneath; a tap on a slide pauses and
+ * resumes it.
+ *
+ * The clip changes only once the feed is at rest, never while a flick passes
+ * slides by, and the video stays hidden until the new clip is actually playing,
+ * so the slide's still is what shows in between rather than the last frame of
+ * the clip before.
  *
  * Sound is on if the browser allows it. Where it refuses, the clip starts
  * muted and the button in the corner turns sound on for the rest of the feed.
@@ -36,11 +42,14 @@ export default function GalleryFeed({
   const scroller = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [current, setCurrent] = useState(start);
-  /** Whether the feed is between slides. */
-  const [moving, setMoving] = useState(false);
+  const currentRef = useRef(start);
+  /** The clip the video has started playing, so it is shown only once it has a frame of its own. */
+  const [playing, setPlaying] = useState<string | null>(null);
   const [muted, setMuted] = useState(false);
   const [paused, setPaused] = useState(false);
   const wantSound = useRef(true);
+  /** Carried from clip to clip so each starts at the quality the last one reached, not the bottom rung. */
+  const bandwidth = useRef<number | undefined>(undefined);
 
   const item = items[current];
   const clip = item?.kind === 'clip' ? item : null;
@@ -62,13 +71,56 @@ export default function GalleryFeed({
     };
   }, [onClose]);
 
+  // Settle on a slide once the feed stops: on `scrollend` where the browser
+  // has it, otherwise once scroll events have paused. Turning the phone
+  // changes every slide's height while the scroll offset stays put, which
+  // would leave the feed between slides; it is put back on the slide it was
+  // showing, and any scroll the browser reports mid-turn is ignored.
+  useEffect(() => {
+    const el = scroller.current;
+    if (!el) return;
+    let height = el.clientHeight;
+    let timer: number | undefined;
+
+    const settle = () => {
+      window.clearTimeout(timer);
+      if (el.clientHeight !== height) return;
+      const nearest = Math.round(el.scrollTop / height);
+      if (nearest === currentRef.current || !items[nearest]) return;
+      currentRef.current = nearest;
+      setCurrent(nearest);
+      setPaused(false);
+    };
+    const onScroll = () => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(settle, SETTLE_MS);
+    };
+    const resize = new ResizeObserver(() => {
+      height = el.clientHeight;
+      el.scrollTop = currentRef.current * height;
+    });
+
+    el.addEventListener('scroll', onScroll, { passive: true });
+    el.addEventListener('scrollend', settle);
+    resize.observe(el);
+    return () => {
+      window.clearTimeout(timer);
+      el.removeEventListener('scroll', onScroll);
+      el.removeEventListener('scrollend', settle);
+      resize.disconnect();
+    };
+  }, [items]);
+
   // Point the one video at the clip the feed is resting on.
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !clipSrc) return;
 
-    let hls: { destroy: () => void } | undefined;
+    let hls: { destroy: () => void; bandwidthEstimate: number } | undefined;
     let cancelled = false;
+
+    const onPlaying = () => setPlaying(clipSrc);
+    video.addEventListener('playing', onPlaying);
 
     const play = () => {
       if (cancelled) return;
@@ -95,7 +147,14 @@ export default function GalleryFeed({
         play();
         return;
       }
-      const instance = new Hls({ enableWorker: true, capLevelToPlayerSize: true });
+      const instance = new Hls({
+        enableWorker: true,
+        capLevelToPlayerSize: true,
+        // A feed is swiped on long before a set ends; buffering far ahead
+        // only spends the connection the next clip could start sharper on.
+        maxBufferLength: 12,
+        ...(bandwidth.current ? { abrEwmaDefaultEstimate: bandwidth.current, testBandwidth: false } : {}),
+      });
       instance.loadSource(clipSrc);
       instance.attachMedia(video);
       instance.on(Hls.Events.MANIFEST_PARSED, play);
@@ -104,36 +163,16 @@ export default function GalleryFeed({
 
     return () => {
       cancelled = true;
+      video.removeEventListener('playing', onPlaying);
       video.pause();
-      hls?.destroy();
+      if (hls) {
+        bandwidth.current = hls.bandwidthEstimate;
+        hls.destroy();
+      }
       video.removeAttribute('src');
       video.load();
     };
   }, [clipSrc]);
-
-  // Hold the clip while the feed is between slides; pick it up again if the
-  // swipe falls back onto the same one.
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video || !video.currentSrc) return;
-    if (moving) video.pause();
-    else if (!paused) video.play().catch(() => {});
-    // `paused` is read, not watched: a tap is handled where it happens.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [moving]);
-
-  const onScroll = () => {
-    const el = scroller.current;
-    if (!el) return;
-    const at = el.scrollTop / el.clientHeight;
-    const nearest = Math.round(at);
-    if (Math.abs(at - nearest) > SETTLED) return setMoving(true);
-    setMoving(false);
-    if (nearest !== current && items[nearest]) {
-      setCurrent(nearest);
-      setPaused(false);
-    }
-  };
 
   const togglePlay = () => {
     const video = videoRef.current;
@@ -153,22 +192,26 @@ export default function GalleryFeed({
     if (video) video.muted = next;
   };
 
+  const shown = clipSrc !== undefined && playing === clipSrc;
+
   return (
     <div className="rd-feed" role="dialog" aria-modal="true" aria-label="Gallery">
-      <div ref={scroller} className="rd-feed-scroll" onScroll={onScroll}>
+      <div ref={scroller} className="rd-feed-scroll">
         {items.map((entry, i) => {
           const upright = entry.kind === 'clip' && entry.upright;
           return (
             <div key={entry.kind === 'clip' ? entry.fullSrc : entry.src} className="rd-feed-slide" onClick={togglePlay}>
-              {/* Only the slides either side of the current one fetch their still. */}
-              {Math.abs(i - current) <= 1 && (
+              {/* Only the slides near the current one fetch their still. Two
+                  either side, since a second swipe can start before the first
+                  has settled. */}
+              {Math.abs(i - current) <= 2 && (
                 <Image
                   src={entry.kind === 'clip' ? entry.poster : entry.src}
                   alt={entry.kind === 'photo' ? entry.alt : ''}
                   fill
                   sizes="100vw"
                   quality={entry.kind === 'photo' ? 90 : 75}
-                  style={{ objectFit: upright ? 'cover' : 'contain' }}
+                  className={upright ? 'rd-feed-media rd-feed-media--upright' : 'rd-feed-media'}
                 />
               )}
               <div className="rd-feed-cap">
@@ -178,28 +221,21 @@ export default function GalleryFeed({
             </div>
           );
         })}
+
+        <video
+          ref={videoRef}
+          className={clip?.upright ? 'rd-feed-video rd-feed-media--upright' : 'rd-feed-video'}
+          playsInline
+          loop
+          preload="none"
+          aria-hidden="true"
+          // Shown with a fade once playing; hidden at once on a change of
+          // clip, so the old frame is never seen over the new slide.
+          style={{ top: `${current * 100}%`, opacity: shown ? 1 : 0, transition: shown ? 'opacity 0.2s ease' : 'none' }}
+        />
       </div>
 
-      <video
-        ref={videoRef}
-        className="rd-feed-video"
-        playsInline
-        loop
-        preload="none"
-        aria-hidden="true"
-        style={{ objectFit: clip?.upright ? 'cover' : 'contain', opacity: clip && !moving ? 1 : 0 }}
-      />
-
-      {/* The video covers the resting slide's own caption, so it is repeated
-          on top; while the feed moves, the slides' captions are the ones seen. */}
-      {clip && !moving && (
-        <div className="rd-feed-cap">
-          <p>{clip.date}</p>
-          <h3>{clip.title}</h3>
-        </div>
-      )}
-
-      {clip && paused && !moving && <span className="rd-feed-paused" aria-hidden="true">▶</span>}
+      {clip && paused && <span className="rd-feed-paused" aria-hidden="true">▶</span>}
 
       <span className="rd-feed-count">{`${String(current + 1).padStart(2, '0')} / ${String(items.length).padStart(2, '0')}`}</span>
 

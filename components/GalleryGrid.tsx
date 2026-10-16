@@ -153,12 +153,18 @@ export function GalleryLightbox({
   onIndex: (index: number | null) => void;
 }) {
   const phone = useSyncExternalStore(watchPhone, () => window.matchMedia(PHONE).matches, () => false);
+  // Which of the two to show is decided as it opens and held until it closes.
+  // A phone turned on its side is wider than the split, and following it
+  // would swap the feed for the lightbox mid-turn and lose the viewer's place.
+  const [openAsFeed, setOpenAsFeed] = useState<boolean | null>(null);
+  if (index !== null && openAsFeed === null) setOpenAsFeed(phone);
+  if (index === null && openAsFeed !== null) setOpenAsFeed(null);
   const active = index === null ? null : items[index];
   const step = (delta: number) => {
     if (index !== null) onIndex((index + delta + items.length) % items.length);
   };
 
-  if (phone) return index === null ? null : <GalleryFeed items={items} start={index} onClose={() => onIndex(null)} />;
+  if (openAsFeed ?? phone) return index === null ? null : <GalleryFeed items={items} start={index} onClose={() => onIndex(null)} />;
 
   return (
     <Lightbox open={active !== null} onClose={() => onIndex(null)} onPrev={() => step(-1)} onNext={() => step(1)}>
