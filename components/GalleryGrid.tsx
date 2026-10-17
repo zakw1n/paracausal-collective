@@ -43,40 +43,72 @@ function Caption({ date, title }: { date: string; title: string }) {
 /**
  * A tile's silent loop. The file is only requested once the tile is near the
  * viewport, so a page that shows several clips below the fold does not pay for
- * them on load; until then the poster stands in.
+ * them on load; until then the poster stands in. It plays only while near the
+ * viewport and pauses once scrolled well away, so a long scroll does not leave
+ * every clip on the page decoding at once. Visitors who prefer reduced motion
+ * get the poster alone and the loop is never fetched.
+ *
+ * Started from script rather than `autoplay`, so components/AutoplayNudge's
+ * tap-to-start only restarts it while `data-playing` says it should be running.
  */
 function LoopVideo({ src, smallSrc, poster }: { src: string; smallSrc: string; poster: string }) {
   const ref = useRef<HTMLVideoElement>(null);
   /** The file to play, chosen once the tile is near: the small cut on a phone. */
   const [near, setNear] = useState<string | null>(null);
+  /** Whether the tile is near the viewport now. */
+  const [inView, setInView] = useState(false);
   /** Whether the loop is being shown as an image, autoplay having been refused. */
   const [stand, setStand] = useState(false);
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry.isIntersecting) return;
-        setNear(window.matchMedia('(width < 736px)').matches ? smallSrc : src);
-        io.disconnect();
-      },
-      { rootMargin: '300px' },
-    );
-    io.observe(el);
-    return () => io.disconnect();
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    let io: IntersectionObserver | undefined;
+    // Loops wait for the page's load event, so on a slow connection the
+    // first-row photos (the page's largest paint) are not competing with
+    // several videos for bandwidth. The posters cover the wait.
+    const start = () => {
+      io = new IntersectionObserver(
+        ([entry]) => {
+          setInView(entry.isIntersecting);
+          if (entry.isIntersecting) setNear((prev) => prev ?? (window.matchMedia('(width < 736px)').matches ? smallSrc : src));
+        },
+        { rootMargin: '300px' },
+      );
+      io.observe(el);
+    };
+    if (document.readyState === 'complete') start();
+    else window.addEventListener('load', start, { once: true });
+    return () => {
+      window.removeEventListener('load', start);
+      io?.disconnect();
+    };
   }, [src, smallSrc]);
 
   // Where the browser refuses to autoplay, the same file is shown through an
   // image instead — see components/MotionImage.
   useEffect(() => {
-    if (!near) return;
-    ref.current?.play().catch((error) => { if (autoplayRefused(error)) setStand(true); });
-  }, [near]);
+    const el = ref.current;
+    if (!el || !near) return;
+    if (inView) el.play().catch((error) => { if (autoplayRefused(error)) setStand(true); });
+    else el.pause();
+  }, [near, inView]);
 
   return (
     <>
-      <video ref={ref} src={near ?? undefined} poster={poster} muted loop autoPlay playsInline data-still={stand ? '' : undefined} style={fillStyle} />
+      <video
+        ref={ref}
+        src={near ?? undefined}
+        poster={poster}
+        muted
+        loop
+        playsInline
+        preload="none"
+        data-playing={near && inView ? 'true' : undefined}
+        data-still={stand ? '' : undefined}
+        style={fillStyle}
+      />
       {stand && near && <MotionImage src={near} style={fillStyle} onError={() => setStand(false)} />}
     </>
   );
@@ -86,7 +118,13 @@ function LoopVideo({ src, smallSrc, poster }: { src: string; smallSrc: string; p
  * One clip or photo as a button that fills its grid cell. Shared by the gallery
  * wall and the home page strip so the two cannot drift apart.
  */
-export function GalleryMediaTile({ tile, onOpen, className = '' }: { tile: GalleryMedia; onOpen: () => void; className?: string }) {
+export function GalleryMediaTile({ tile, onOpen, className = '', eager = false }: {
+  tile: GalleryMedia;
+  onOpen: () => void;
+  className?: string;
+  /** For tiles on screen at load: the photo is fetched at once and first, as it is the page's largest paint. */
+  eager?: boolean;
+}) {
   if (tile.kind === 'clip') {
     return (
       <button onClick={onOpen} className={`rd-card ${className}`} aria-label={`Play ${tile.title}`} style={tileStyle}>
@@ -120,6 +158,8 @@ export function GalleryMediaTile({ tile, onOpen, className = '' }: { tile: Galle
         sizes="(max-width: 1500px) 66vw, 1000px"
         /* Above the default 75; see the note in next.config.ts. */
         quality={90}
+        loading={eager ? 'eager' : 'lazy'}
+        fetchPriority={eager ? 'high' : undefined}
         style={fillStyle}
       />
       <Caption date={tile.date} title={tile.title} />
@@ -242,6 +282,8 @@ export default function GalleryGrid() {
               key={tile.kind === 'clip' ? tile.fullSrc : tile.src}
               tile={tile}
               className={i === lit ? 'rd-lit' : ''}
+              // The first row, whatever the width: four across on desktop, two on a phone.
+              eager={i < 4}
               onOpen={() => setOpenIndex(i)}
             />
           ))}

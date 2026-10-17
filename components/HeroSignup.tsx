@@ -31,7 +31,7 @@ const inputStyle: CSSProperties = {
 };
 
 /**
- * Hero mailing-list capture. Posts to /api/subscribe, which adds the address
+ * Mailing-list capture on the events page. Posts to /api/subscribe, which adds the address
  * to the Resend audience.
  */
 export default function HeroSignup() {
@@ -82,7 +82,7 @@ export default function HeroSignup() {
           margin: '0 0 14px',
         }}
       >
-        Next date, before it goes public
+        Get the next date before it drops
       </p>
 
       <form

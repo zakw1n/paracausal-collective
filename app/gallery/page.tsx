@@ -1,17 +1,18 @@
 import type { Metadata } from 'next';
 import GalleryGrid from '@/components/GalleryGrid';
-import { pageTitle } from '@/lib/site';
+import { pageTitle, pageMeta } from '@/lib/site';
 import PageHeader from '@/components/PageHeader';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: pageTitle('Gallery'),
   description: 'Gallery & media. A living archive of Paracausal nights in Cape Town.',
-};
+  path: '/gallery',
+});
 
 export default function GalleryPage() {
   return (
-    <main className="rd-reveal rd-gallery-page">
-      <PageHeader eyebrow="Archive" title="GALLERY" gap={48} />
+    <main className="rd-gallery-page">
+      <PageHeader title="GALLERY" gap={48} />
 
       <GalleryGrid />
 

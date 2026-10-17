@@ -6,7 +6,7 @@ import ArtistCard from '@/components/ArtistCard';
 import EventMediaGrid from '@/components/EventMediaGrid';
 import Tag from '@/components/ds/Tag';
 import { eyebrowMuted as divider } from '@/components/ds/styles';
-import { TICKETS_URL, artistsForEvent, eventById, events, pageTitle } from '@/lib/site';
+import { TICKETS_URL, artistsForEvent, eventById, events, pageTitle, pageMeta } from '@/lib/site';
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -20,9 +20,12 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   if (!event) return { title: pageTitle('Event not found') };
 
   return {
-    title: pageTitle(event.title),
-    description: `${event.title} · ${event.date} · ${event.venue}`,
-    openGraph: { images: [event.banner] },
+    ...pageMeta({
+      title: pageTitle(event.title),
+      description: `${event.title} · ${event.date} · ${event.venue}`,
+      path: `/events/${event.id}`,
+      image: event.banner,
+    }),
   };
 }
 
@@ -52,7 +55,7 @@ export default async function EventPage({ params }: Params) {
   const upcoming = event.status === 'upcoming';
 
   return (
-    <main className="rd-reveal" style={{ padding: '120px clamp(20px,5vw,64px) 110px', maxWidth: 1200, margin: '0 auto' }}>
+    <main style={{ padding: '120px clamp(20px,5vw,64px) 110px', maxWidth: 1200, margin: '0 auto' }}>
       <Link href="/events" style={{ ...meta, color: 'var(--pc-cyan)', textDecoration: 'none' }}>
         ← All events
       </Link>

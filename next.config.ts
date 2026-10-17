@@ -1,6 +1,27 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  /**
+   * Baseline security headers on every response. Deliberately no full
+   * Content-Security-Policy: the pages load Stream manifests, R2 media, blob:
+   * URLs from hls.js and Next's inline bootstrap scripts, and a CSP strict
+   * enough to matter needs per-request nonces. `frame-ancestors` stops other
+   * sites framing these pages (clickjacking) without touching what they load.
+   */
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+          { key: 'Content-Security-Policy', value: "frame-ancestors 'self'; object-src 'none'; base-uri 'self'" },
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), payment=(), usb=()' },
+        ],
+      },
+    ];
+  },
   images: {
     /**
      * Photos live in the R2 bucket alongside the video (see lib/site.ts), and

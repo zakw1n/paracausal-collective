@@ -127,6 +127,13 @@ export default function HeroVideo({
     import('hls.js').then(({ default: Hls }) => {
       if (cancelled || !under.isConnected) return;
 
+      // A visitor who has asked to save data (Chrome's data saver, or a
+      // connection the browser rates 3G or slower) gets the reel sized to the
+      // screen's CSS pixels rather than its device pixels — on a phone the
+      // 720p rung instead of 1080p, roughly half the bytes.
+      const connection = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
+      const lean = !!connection && (connection.saveData === true || ['slow-2g', '2g', '3g'].includes(connection.effectiveType ?? ''));
+
       const attach = (video: HTMLVideoElement, autoplay: boolean) => {
         if (!Hls.isSupported()) {
           if (!video.canPlayType('application/vnd.apple.mpegurl')) return;
@@ -144,6 +151,7 @@ export default function HeroVideo({
           // it step down if that proves wrong.
           abrEwmaDefaultEstimate: phone ? 3_000_000 : 8_000_000,
           capLevelToPlayerSize: true,
+          ...(lean ? { maxDevicePixelRatio: 1 } : {}),
         });
         instance.loadSource(manifest);
         instance.attachMedia(video);

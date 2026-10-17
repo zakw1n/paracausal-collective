@@ -61,6 +61,15 @@ export default function GalleryFeed({
     if (el) el.scrollTop = start * el.clientHeight;
   }, [start]);
 
+  // Focus moves to the close button as the feed opens and back to the tapped
+  // tile as it closes, for keyboard and screen-reader users.
+  const closeButton = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    const opener = document.activeElement as HTMLElement | null;
+    closeButton.current?.focus({ preventScroll: true });
+    return () => opener?.focus?.({ preventScroll: true });
+  }, []);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', onKey);
@@ -239,7 +248,7 @@ export default function GalleryFeed({
 
       <span className="rd-feed-count">{`${String(current + 1).padStart(2, '0')} / ${String(items.length).padStart(2, '0')}`}</span>
 
-      <button type="button" className="rd-feed-btn rd-feed-close" aria-label="Close" onClick={onClose}>✕</button>
+      <button ref={closeButton} type="button" className="rd-feed-btn rd-feed-close" aria-label="Close" onClick={onClose}>✕</button>
       {clip && (
         <button type="button" className="rd-feed-btn rd-feed-sound" aria-pressed={!muted} aria-label={muted ? 'Turn sound on' : 'Turn sound off'} onClick={toggleSound}>
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

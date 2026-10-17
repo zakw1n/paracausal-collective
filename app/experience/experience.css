@@ -19,9 +19,9 @@
   --sc-accent: #34e7de;
   --sc-accent-ink: #05060a;
 
-  --sc-font-display: 'Archivo', 'Archivo Black', Impact, sans-serif;
-  --sc-font-text: 'Space Grotesk', 'Helvetica Neue', Arial, sans-serif;
-  --sc-font-mono: 'Space Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --sc-font-display: var(--nf-archivo), Impact, sans-serif;
+  --sc-font-text: var(--nf-grotesk), 'Helvetica Neue', Arial, sans-serif;
+  --sc-font-mono: var(--nf-mono), ui-monospace, 'SF Mono', Menlo, monospace;
 }
 
 .x {

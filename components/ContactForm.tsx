@@ -1,10 +1,38 @@
 'use client';
 
 import { useState } from 'react';
+import type { FormEvent } from 'react';
 import Button from '@/components/ds/Button';
+import { site } from '@/lib/site';
 
 export default function ContactForm() {
   const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+  /** Set when the send failed: a mailto: link carrying the same message. */
+  const [fallback, setFallback] = useState<string | null>(null);
+
+  // Posts to app/api/contact, the same route as the footer's contact band.
+  // The topic goes at the head of the message, which is all the route takes.
+  const submit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const { name, email, topic, message } = Object.fromEntries(new FormData(e.currentTarget)) as Record<string, string>;
+    const body = `[${topic}]\n\n${message}`;
+    setSending(true);
+    setFallback(null);
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, message: body }),
+      });
+      if (res.ok) setSent(true);
+      else throw new Error();
+    } catch {
+      setFallback(`mailto:${site.email}?subject=${encodeURIComponent(`${topic} — ${name}`)}&body=${encodeURIComponent(message)}`);
+    } finally {
+      setSending(false);
+    }
+  };
 
   if (sent) {
     return (
@@ -63,7 +91,7 @@ export default function ContactForm() {
 
   return (
     <form
-      onSubmit={(e) => { e.preventDefault(); setSent(true); }}
+      onSubmit={submit}
       style={{ display: 'flex', flexDirection: 'column', gap: 18 }}
     >
       <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--fs-2xs)', letterSpacing: 'var(--ls-wider)', textTransform: 'uppercase', color: 'var(--text-muted)', margin: '0 0 4px' }}>
@@ -84,7 +112,13 @@ export default function ContactForm() {
 
       <textarea required name="message" rows={6} placeholder="Write your message here..." className="rd-field" style={{ padding: '12px 14px', resize: 'none' }} />
 
-      <Button size="lg" variant="primary" block type="submit">Send message</Button>
+      <Button size="lg" variant="primary" block type="submit" disabled={sending}>{sending ? 'Sending…' : 'Send message'}</Button>
+
+      {fallback && (
+        <p role="alert" style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--fs-2xs)', letterSpacing: 'var(--ls-wide)', textTransform: 'uppercase', color: 'var(--text-secondary)', textAlign: 'center', margin: 0 }}>
+          That didn&rsquo;t send. <a href={fallback} style={{ color: 'var(--pc-cyan)' }}>Email it to us instead</a>
+        </p>
+      )}
 
       <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 'var(--ls-wide)', textTransform: 'uppercase', color: 'var(--text-faint)', textAlign: 'center', margin: 0 }}>
         We aim to respond within 48 hours

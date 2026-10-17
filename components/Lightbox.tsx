@@ -15,6 +15,8 @@ type Props = {
   onClose: () => void;
   onPrev?: () => void;
   onNext?: () => void;
+  /** Accessible name for the dialog. */
+  label?: string;
   children: ReactNode;
 };
 
@@ -32,9 +34,21 @@ const arrowStyle = {
   fontSize: 18,
 } as const;
 
-export default function Lightbox({ open, onClose, onPrev, onNext, children }: Props) {
+export default function Lightbox({ open, onClose, onPrev, onNext, label = 'Media viewer', children }: Props) {
   /** Where the current touch began, or null when it should not count as a swipe. */
   const touchStart = useRef<{ x: number; y: number } | null>(null);
+  const dialog = useRef<HTMLDivElement>(null);
+  const closeButton = useRef<HTMLButtonElement>(null);
+
+  // Focus moves into the dialog as it opens and back to whatever opened it
+  // (the tile) as it closes, so keyboard and screen-reader users are not left
+  // on the page behind the overlay.
+  useEffect(() => {
+    if (!open) return;
+    const opener = document.activeElement as HTMLElement | null;
+    closeButton.current?.focus();
+    return () => opener?.focus?.();
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -42,6 +56,15 @@ export default function Lightbox({ open, onClose, onPrev, onNext, children }: Pr
       if (e.key === 'Escape') onClose();
       else if (e.key === 'ArrowLeft') onPrev?.();
       else if (e.key === 'ArrowRight') onNext?.();
+      else if (e.key === 'Tab') {
+        // Keep Tab inside the dialog.
+        const focusable = dialog.current?.querySelectorAll<HTMLElement>('button, video[controls], a[href]');
+        if (!focusable?.length) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
     };
     window.addEventListener('keydown', onKey);
     document.body.style.overflow = 'hidden';
@@ -71,8 +94,10 @@ export default function Lightbox({ open, onClose, onPrev, onNext, children }: Pr
         if (dx > 0) onPrev?.();
         else onNext?.();
       }}
+      ref={dialog}
       role="dialog"
       aria-modal="true"
+      aria-label={label}
       style={{
         position: 'fixed',
         inset: 0,
@@ -100,6 +125,7 @@ export default function Lightbox({ open, onClose, onPrev, onNext, children }: Pr
         {children}
       </div>
       <button
+        ref={closeButton}
         onClick={onClose}
         aria-label="Close"
         style={{

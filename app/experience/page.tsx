@@ -3,15 +3,16 @@ import type { Metadata } from 'next';
 import ExperienceBar from '@/components/experience/ExperienceBar';
 import FlyerStack from '@/components/experience/FlyerStack';
 import ScrollCraftMount from '@/components/experience/ScrollCraftMount';
-import { TICKETS_URL, cdn, events, pageTitle, site, upcomingEvent } from '@/lib/site';
+import { TICKETS_URL, cdn, events, pageTitle, site, upcomingEvent, pageMeta } from '@/lib/site';
 
 import './scrollcraft.css';
 import './experience.css';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: pageTitle('Experience'),
   description: 'Six nights of psychedelic trance in Cape Town, as a single descent.',
-};
+  path: '/experience',
+});
 
 /**
  * The scroll-driven route.

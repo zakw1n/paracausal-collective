@@ -12,12 +12,16 @@ export const site = {
   locationLong: 'Cape Town, South Africa',
   founded: '2023',
   email: 'paracausalevents@gmail.com',
+  /** Shown as typed; `phoneHref` is the same number for a tel: link. */
+  phone: '+27 64 654 2006',
+  phoneHref: 'tel:+27646542006',
+  instagram: { handle: '@paracausal', href: 'https://instagram.com/paracausal' },
   /** Hero sub-headline, and the base of the site-wide metadata description. */
   tagline:
     'A collective pushing high-energy psychedelic music to a generation chasing deeper realms of consciousness.',
   /** Open Graph description and the footer blurb. */
   blurb: 'Underground psychedelic experiences. Cape Town, South Africa. Existing at the edge of perception.',
-  /** The About page pull quote. */
+  /** The pull quote on the experience page. */
   pullQuote: 'Existing at the edge of perception.',
   /**
    * The home page's short telling of the origin story. The About page tells the
@@ -32,6 +36,37 @@ export const site = {
 
 /** `Events — Paracausal`. Every page title goes through this. */
 export const pageTitle = (label: string) => `${label} — ${site.name}`;
+
+/**
+ * The production origin. Canonical URLs, the sitemap and social previews are
+ * built on it, so a preview deploy (demo.paracausal.world) points search
+ * engines at the real site rather than at itself.
+ */
+export const SITE_URL = 'https://paracausal.world';
+
+/** Link-preview image for pages without their own: the Dendrite stage projection. */
+const socialImage = { url: '/gallery/dendrite-poster.jpg', width: 1280, height: 720, alt: 'The AFTERLIGHT V stage under a projection of glowing cellular shapes' };
+
+/**
+ * A page's metadata: title, description, canonical URL and the matching Open
+ * Graph fields. A page's `openGraph` replaces the layout's whole object rather
+ * than merging into it, so every field is set here together.
+ */
+export const pageMeta = ({ title, description, path, image }: { title: string; description: string; path: string; image?: string }) => ({
+  title,
+  description,
+  alternates: { canonical: path },
+  openGraph: {
+    title,
+    description,
+    url: path,
+    siteName: site.name,
+    type: 'website' as const,
+    locale: 'en_ZA',
+    images: [image ?? socialImage],
+  },
+  twitter: { card: 'summary_large_image' as const, title, description, images: [image ?? socialImage] },
+});
 
 /** Byline used under the About pull quote and in the footer's legal row. */
 export const byline = `${site.legalName} · ${site.location}`;
@@ -143,6 +178,7 @@ export const featuredClip = galleryClip({
 
 /** Stream video id for the 15s showreel behind the home page hero, 16:9. */
 export const SHOWREEL_UID = '3eb405dd02c10fbd58da487b6416ed68';
+
 
 /** Stream video id for the portrait cut of the showreel, 9:16, shown on phones. */
 export const SHOWREEL_MOBILE_UID = '2e1b7e93f1f47eadcab7aac02071b723';
@@ -312,7 +348,6 @@ export const galleryPhotos: GalleryPhoto[] = [stagePhoto, smokePhoto, boisPhoto,
 export const navLinks = [
   { label: 'Home',    href: '/' },
   { label: 'Events',  href: '/events' },
-  { label: 'Artists', href: '/artists' },
   { label: 'Gallery', href: '/gallery' },
   { label: 'About',   href: '/about' },
   { label: 'Contact', href: '/contact' },
