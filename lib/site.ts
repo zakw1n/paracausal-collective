@@ -34,8 +34,8 @@ export const site = {
   ],
 } as const;
 
-/** `Events — Paracausal`. Every page title goes through this. */
-export const pageTitle = (label: string) => `${label} — ${site.name}`;
+/** Page titles are just the label (`Events`). Every page title goes through this. */
+export const pageTitle = (label: string) => label;
 
 /**
  * The production origin. Canonical URLs, the sitemap and social previews are
