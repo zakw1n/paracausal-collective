@@ -1,126 +1,72 @@
-'use client';
-
-import { motion } from 'framer-motion';
+import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
+import PageHeader from '@/components/PageHeader';
+import { galleryPhotos, pageTitle, pageMeta } from '@/lib/site';
 
-const stats = [
-  { value: '2022', label: 'Founded' },
-  { value: '12+', label: 'Events' },
-  { value: '3K+', label: 'Attendees' },
-  { value: 'CPT', label: 'Based In' },
+export const metadata: Metadata = pageMeta({
+  title: pageTitle('About'),
+  description: 'A Cape Town psytrance collective. From house parties to secret beach raves to a residency at EVØL Nightclub.',
+  path: '/about',
+});
+
+/* Built from "About Page v2" in the Paracausal Claude Design project
+   (ui_kits/website/About Page v2.html). Its team-photo slot was an empty
+   placeholder, filled here from the gallery. The design's photo banner was
+   swapped for the centred page heading the other pages use. */
+const [, , bois] = galleryPhotos;
+
+const intro = [
+  'What started as a group of friends enjoying the wonders of psychedelic music, quickly grew into a key player in psytrance adoption in Cape Town.',
+  'Paracausal started with a vision, and that vision was to create a space where people can experience the freedom of psytrance, and liberate themselves to the music.',
+  'From house parties, to secret beach raves, we now find ourselves with a residency at Evol Nightclub, where we have the privilege of sharing our AFTERLIGHT series with Cape Town’s youth.',
+];
+
+const offers = [
+  {
+    eyebrow: 'Paracausal',
+    title: 'Events',
+    body: 'High energy, dark psychedelic trance. Our AFTERLIGHT series runs as a residency at Evol Nightclub.',
+    link: { label: 'Upcoming events', href: '/events' },
+  },
+  {
+    eyebrow: 'Paracausal Private',
+    title: 'Private hire',
+    body: 'DJs, sound and atmosphere for private and corporate events. Weddings · Corporate · Golf days · Private parties.',
+    link: { label: 'Get in touch', href: '/contact' },
+  },
 ];
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-[#080808] text-[#FFFDFA]" style={{ fontFamily: "'DM Sans', sans-serif" }}>
-      <div
-        className="fixed inset-0 pointer-events-none"
-        style={{ background: 'radial-gradient(ellipse 70% 50% at 30% 20%, rgba(55,31,118,0.10) 0%, transparent 60%)' }}
-      />
+    <main className="rd-page">
+      <header style={{ padding: '120px clamp(20px,5vw,64px) 0' }}>
+        <PageHeader title="ABOUT" gap={0} />
+      </header>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-28 pb-24">
-        {/* Back */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="mb-12"
-        >
-          <Link href="/" className="text-white/40 hover:text-white transition-colors text-xs tracking-widest uppercase">
-            ← Home
-          </Link>
-        </motion.div>
-
-        {/* Heading */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          className="mb-16"
-        >
-          <p className="text-[10px] tracking-[0.5em] uppercase mb-4" style={{ color: '#4a3896' }}>Who We Are</p>
-          <h1
-            className="text-white leading-none mb-6"
-            style={{ fontFamily: "'Archivo Black', sans-serif", letterSpacing: '0.05em', fontSize: 'clamp(3rem, 10vw, 7rem)' }}
-          >
-            About
-            <br />
-            <span className="text-white/20">Paracausal</span>
-          </h1>
-          <div className="h-px w-24" style={{ background: 'linear-gradient(to right, #4a3896, transparent)' }} />
-        </motion.div>
-
-        {/* Stats */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.2 }}
-          className="grid grid-cols-2 sm:grid-cols-4 gap-px mb-16"
-          style={{ background: 'rgba(255,255,255,0.05)' }}
-        >
-          {stats.map(({ value, label }) => (
-            <div key={label} className="flex flex-col items-center justify-center py-8 px-4 bg-[#080808]">
-              <p
-                className="text-3xl sm:text-4xl text-white mb-1"
-                style={{ fontFamily: "'Archivo Black', sans-serif" }}
-              >
-                {value}
-              </p>
-              <p className="text-[9px] tracking-[0.4em] text-white/30 uppercase">{label}</p>
-            </div>
+      <section className="rd-page-wrap rd-page-intro" style={{ paddingTop: 56 }}>
+        <div className="rd-page-photo">
+          <Image src={bois.src} alt={bois.alt} fill sizes="(max-width: 800px) 100vw, 560px" quality={90} style={{ objectFit: 'cover' }} />
+        </div>
+        <div>
+          <h2>This is Paracausal</h2>
+          {intro.map((text) => (
+            <p key={text}>{text}</p>
           ))}
-        </motion.div>
+        </div>
+      </section>
 
-        {/* Body text */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.3 }}
-          className="grid sm:grid-cols-2 gap-12 mb-16"
-        >
-          <div className="space-y-5 text-white/50 text-sm leading-relaxed">
-            <p>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-            </p>
-            <p>
-              Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-            </p>
-            <p>
-              Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.
-            </p>
+      <section className="rd-page-wrap rd-page-offer">
+        {offers.map((offer) => (
+          <div key={offer.title}>
+            <span className="rd-page-mono">{offer.eyebrow}</span>
+            <h3>{offer.title}</h3>
+            <p>{offer.body}</p>
+            <Link href={offer.link.href}>{offer.link.label} &rarr;</Link>
           </div>
-          <div className="space-y-5 text-white/50 text-sm leading-relaxed">
-            <p>
-              Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet.
-            </p>
-            <p>
-              At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident.
-            </p>
-            <p>
-              Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis voluptas assumenda est, omnis dolor repellendus.
-            </p>
-          </div>
-        </motion.div>
+        ))}
+      </section>
 
-        {/* Divider */}
-        <div className="h-px mb-12" style={{ background: 'linear-gradient(to right, transparent, rgba(74,56,150,0.3), transparent)' }} />
-
-        {/* Manifesto-style pull quote */}
-        <motion.blockquote
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.5 }}
-          className="text-center"
-        >
-          <p
-            className="text-2xl sm:text-4xl text-white/70 leading-snug"
-            style={{ fontFamily: "'Archivo Black', sans-serif", letterSpacing: '0.04em' }}
-          >
-            "Existing at the edge of perception."
-          </p>
-          <p className="mt-4 text-[10px] tracking-[0.5em] text-white/25 uppercase">Paracausal Collective · Cape Town</p>
-        </motion.blockquote>
-      </div>
-    </div>
+    </main>
   );
 }

@@ -1,0 +1,554 @@
+/*
+ * /experience — rhythmic cutlist.
+ *
+ * Two jobs only: rebrand the engine's tokens onto the Paracausal palette, and
+ * style this page's own markup. Nothing here restyles `.sc-stage`, `.sc-copy`
+ * or any `[data-sc-*]` selector, which are the mechanism.
+ *
+ * Grounds are painted per section, on hard edges. This page never uses
+ * `data-sc-drift`: with fourteen short acts several are always part-way
+ * through at once, so an interpolated ground arrives a screen late and reads
+ * as a bug. A cut is not a fade.
+ */
+
+:root {
+  --sc-canvas: #05060a;
+  --sc-surface: #10131c;
+  --sc-ink: #ffffff;
+  --sc-ink-soft: #8b94a8;
+  --sc-accent: #34e7de;
+  --sc-accent-ink: #05060a;
+
+  --sc-font-display: var(--nf-archivo), Impact, sans-serif;
+  --sc-font-text: var(--nf-grotesk), 'Helvetica Neue', Arial, sans-serif;
+  --sc-font-mono: var(--nf-mono), ui-monospace, 'SF Mono', Menlo, monospace;
+}
+
+.x {
+  background: var(--sc-canvas);
+  color: var(--sc-ink);
+  font-family: var(--sc-font-text);
+}
+
+/* ---------------------------------------------------------------- the bar -- */
+/* Loud, not minimal: full width, CTA at the same weight as the wordmark. */
+
+.xbar {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 60;
+  background: var(--sc-canvas);
+  border-bottom: 1px solid color-mix(in oklab, var(--sc-ink) 18%, transparent);
+}
+
+.xbar__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px clamp(16px, 4vw, 40px);
+}
+
+.xbar__mark,
+.xbar__cta {
+  font-family: var(--sc-font-display);
+  font-stretch: 125%;
+  font-weight: 800;
+  font-size: clamp(0.95rem, 2.4vw, 1.35rem);
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  color: var(--sc-ink);
+}
+
+.xbar__cta {
+  background: var(--sc-accent);
+  color: var(--sc-accent-ink);
+  padding: 8px 18px;
+}
+
+/* The held moment. The bar belongs to no act, so it can stay open across the
+   three crowd cuts while the acts underneath keep cutting. */
+.xbar__hold {
+  margin: 0;
+  overflow: hidden;
+  height: 0;
+  opacity: 0;
+  background: var(--sc-accent);
+  color: var(--sc-accent-ink);
+  font-family: var(--sc-font-display);
+  font-stretch: 125%;
+  font-weight: 900;
+  font-size: clamp(1.6rem, 7vw, 4.5rem);
+  line-height: 1;
+  text-align: center;
+  transition: height 0.5s cubic-bezier(0.22, 0.61, 0.36, 1), opacity 0.3s linear, padding 0.5s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.xbar[data-open] .xbar__hold {
+  height: auto;
+  opacity: 1;
+  padding: 10px 0 14px;
+}
+
+/* ---------------------------------------------------------------- the acts -- */
+/* Every act lands whole and cuts. Nothing is held, so nothing exceeds 1.25vh. */
+
+.x-act {
+  position: relative;
+  min-height: 92vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(24px, 6vw, 72px);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.x-bleed {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -1;
+}
+
+/* 1 · the room */
+.x-room {
+  min-height: 100vh;
+  background: #000;
+}
+
+.x-room__copy {
+  position: relative;
+  text-align: left;
+  width: min(100%, 1100px);
+  margin-top: 6vh;
+}
+
+.x-room__copy .sc-body {
+  color: var(--sc-ink);
+  font-family: var(--sc-font-mono);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-size: clamp(0.7rem, 1.6vw, 0.9rem);
+}
+
+/* 2 · the name */
+.x-name {
+  min-height: 78vh;
+  background: var(--sc-accent);
+}
+
+.x-wordmark {
+  margin: 0;
+  font-family: var(--sc-font-display);
+  font-stretch: 125%;
+  font-weight: 900;
+  color: var(--sc-accent-ink);
+  font-size: clamp(2.6rem, 13vw, 12rem);
+  line-height: 0.9;
+  letter-spacing: -0.02em;
+  text-align: center;
+}
+
+/* 3 · the claim */
+.x-claim {
+  min-height: 88vh;
+  background: var(--sc-canvas);
+  text-align: left;
+}
+
+.x-claim .sc-stack {
+  /* A `ch` measure at display size wrapped this to one word per line and
+     overflowed the act. The line count, not the character count, is what
+     matters on a sentence set this large. */
+  max-width: min(100%, 1100px);
+  margin-inline: 0 auto;
+}
+
+/* 4, 6 · the clips */
+.x-clip {
+  background: #000;
+  padding: 0;
+}
+
+.x-clip__frame {
+  position: absolute;
+  inset: 0;
+  line-height: 1;
+}
+
+.x-clip__frame video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.x-clip--tight {
+  min-height: 80vh;
+}
+
+.x-stamp {
+  position: absolute;
+  bottom: clamp(18px, 4vw, 44px);
+  left: clamp(18px, 4vw, 44px);
+  margin: 0;
+  font-family: var(--sc-font-mono);
+  font-size: clamp(0.68rem, 1.5vw, 0.85rem);
+  letter-spacing: 0.24em;
+  color: var(--sc-ink);
+}
+
+.x-stamp--right {
+  left: auto;
+  right: clamp(18px, 4vw, 44px);
+}
+
+/* 5 · the count */
+.x-count {
+  min-height: 86vh;
+  background: var(--sc-surface);
+}
+
+.x-figure {
+  margin: 0;
+  font-family: var(--sc-font-display);
+  font-stretch: 125%;
+  font-weight: 900;
+  font-size: clamp(3rem, 16vw, 13rem);
+  line-height: 0.88;
+  text-align: center;
+  color: var(--sc-ink);
+}
+
+.x-figure--sub {
+  font-size: clamp(1.2rem, 4vw, 3rem);
+  color: var(--sc-accent);
+  margin-top: 0.25em;
+}
+
+/* 7 · the roll */
+.x-roll {
+  min-height: 90vh;
+  background: var(--sc-canvas);
+}
+
+.x-roll ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: min(100%, 1200px);
+}
+
+.x-roll li {
+  font-family: var(--sc-font-display);
+  font-stretch: 125%;
+  font-weight: 800;
+  font-size: clamp(1.8rem, 9vw, 7rem);
+  line-height: 1.04;
+  padding: 0.06em 0;
+  border-bottom: 1px solid color-mix(in oklab, var(--sc-ink) 16%, transparent);
+  color: var(--sc-ink);
+}
+
+.x-roll li:nth-child(even) {
+  text-align: right;
+  color: var(--sc-accent);
+}
+
+/* 8 · the authored silence */
+.x-silence {
+  min-height: 96vh;
+  background: #000;
+}
+
+.x-silence .sc-body {
+  max-width: 30ch;
+  text-align: center;
+  color: var(--sc-ink-soft);
+  font-size: clamp(1.25rem, 3.2vw, 2rem);
+}
+
+/* 9, 10, 11 · the peak */
+.x-crowd {
+  background: #000;
+  padding: 0;
+  min-height: 100vh;
+}
+
+.x-crowd__frame {
+  position: absolute;
+  inset: 0;
+  line-height: 1;
+}
+
+.x-crowd .sc-scrim {
+  z-index: 0;
+}
+
+.x-crowd__frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.x-crowd__copy {
+  position: absolute;
+  left: clamp(18px, 5vw, 60px);
+  bottom: clamp(60px, 12vh, 140px);
+  max-width: 26ch;
+}
+
+.x-crowd__copy .sc-body {
+  color: var(--sc-ink);
+  font-size: clamp(1rem, 2.4vw, 1.4rem);
+}
+
+.x-peakline {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  align-self: flex-end;
+  width: min(100%, 1000px);
+  font-family: var(--sc-font-display);
+  font-stretch: 125%;
+  font-weight: 900;
+  font-size: clamp(1.8rem, 6.5vw, 5rem);
+  line-height: 1.02;
+  color: var(--sc-ink);
+  padding-bottom: 8vh;
+}
+
+/* 12 · the archive, the signature move */
+.x-archive {
+  min-height: 110vh;
+  background: var(--sc-surface);
+  align-items: center;
+}
+
+.flyers {
+  /* Single column: the flyers are 3:1 banners, so the stack is wide and the
+     list belongs under it rather than beside it. */
+  display: flex;
+  flex-direction: column;
+  gap: clamp(24px, 4vw, 48px);
+  width: min(100%, 1100px);
+}
+
+.flyers__stage {
+  position: relative;
+  /* Matches the source banners (3:1), so `cover` crops almost nothing. */
+  aspect-ratio: 3 / 1;
+  width: 100%;
+  touch-action: pan-y;
+}
+
+.flyer {
+  position: absolute;
+  inset: 0;
+  border: 1px solid color-mix(in oklab, var(--sc-ink) 20%, transparent);
+  background: #000;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+  will-change: transform;
+  overflow: hidden;
+}
+
+.flyer[data-top] {
+  cursor: grab;
+}
+
+.flyer[data-top]:active {
+  cursor: grabbing;
+}
+
+.flyer img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* The caption sits under the stack. Every banner carries its own title art,
+   so an overlay landed straight on top of the flyer's own typography. */
+.flyers__caption {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+}
+
+.flyer__title {
+  font-family: var(--sc-font-display);
+  font-stretch: 125%;
+  font-weight: 800;
+  font-size: clamp(1rem, 2.4vw, 1.5rem);
+  color: var(--sc-ink);
+}
+
+.flyer__sub {
+  font-family: var(--sc-font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--sc-ink-soft);
+}
+
+.flyers__empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  border: 1px dashed color-mix(in oklab, var(--sc-ink) 24%, transparent);
+  color: var(--sc-ink-soft);
+}
+
+.flyers__empty button,
+.flyers__throw {
+  font-family: var(--sc-font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--sc-accent-ink);
+  background: var(--sc-accent);
+  border: 0;
+  padding: 12px 22px;
+  cursor: pointer;
+  min-height: 44px;
+}
+
+.flyers__side h2 {
+  margin: 0 0 12px;
+}
+
+.flyers__count {
+  font-family: var(--sc-font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--sc-accent);
+  margin: 18px 0;
+}
+
+.flyers__list {
+  list-style: none;
+  margin: 20px 0 0;
+  padding: 0;
+  border-top: 1px solid color-mix(in oklab, var(--sc-ink) 16%, transparent);
+}
+
+.flyers__list a {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 14px;
+  padding: 12px 0;
+  border-bottom: 1px solid color-mix(in oklab, var(--sc-ink) 12%, transparent);
+  font-family: var(--sc-font-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--sc-ink-soft);
+  text-decoration: none;
+  min-height: 44px;
+  align-items: center;
+}
+
+.flyers__list a:hover,
+.flyers__list a:focus-visible {
+  color: var(--sc-accent);
+}
+
+/* 13 · the build */
+.x-build {
+  min-height: 92vh;
+  background: var(--sc-canvas);
+}
+
+.x-build {
+  padding: 0;
+  background: #000;
+}
+
+.x-build__frame {
+  position: absolute;
+  inset: 0;
+  line-height: 1;
+}
+
+.x-build__frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* 14 · the close. Abrupt: the last cut is the CTA, full bleed, no drift down. */
+.x-close {
+  min-height: 100vh;
+  background: #000;
+  text-align: center;
+}
+
+.x-close__inner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  background: color-mix(in oklab, var(--sc-canvas) 82%, transparent);
+  padding: clamp(28px, 6vw, 64px);
+}
+
+.x-cta {
+  font-family: var(--sc-font-display);
+  font-stretch: 125%;
+  font-weight: 800;
+  font-size: clamp(1rem, 3vw, 1.6rem);
+  background: var(--sc-accent);
+  color: var(--sc-accent-ink);
+  text-decoration: none;
+  padding: 16px 34px;
+  min-height: 54px;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* ---------------------------------------------------------------- mobile -- */
+/* Art directed, not reflowed: the stack goes above its own list, the peak line
+   sits lower, and every tap target clears 44px. */
+
+@media (max-width: 860px) {
+
+
+  .flyers__stage {
+    aspect-ratio: 2 / 1;
+  }
+
+  .x-claim .sc-stack {
+    max-width: none;
+  }
+
+  .x-roll li:nth-child(even) {
+    text-align: left;
+  }
+
+  .x-crowd__copy {
+    bottom: clamp(40px, 9vh, 90px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .xbar__hold,
+  .flyer {
+    transition: none;
+  }
+
+  /* Depth stays in the static composition: the stack still reads as a stack. */
+  .x-bleed {
+    object-position: center;
+  }
+}

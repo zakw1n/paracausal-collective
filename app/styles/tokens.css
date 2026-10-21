@@ -1,0 +1,192 @@
+/* ─────────────────────────────────────────────────────────────
+   Paracausal design-system tokens
+   Imported from the Claude Design project
+   "paracausal-design-system-a774f157-eeab-41b4-b488-f94664bfc52f"
+   ───────────────────────────────────────────────────────────── */
+
+/* ---- Colors ---------------------------------------------------------- */
+:root {
+  /* Void scale (black → cool near-blacks → surfaces → lines) */
+  --pc-black: #000000;
+  --pc-void: #05060A;
+  --pc-abyss: #0A0C12;
+  --pc-surface: #10131C;
+  --pc-elevated: #171B27;
+  --pc-line: #232838;
+  --pc-line-strong: #363D52;
+
+  /* Light scale (white → cool greys) */
+  --pc-white: #FFFFFF;
+  --pc-fog: #C6CCDA;
+  --pc-mist: #8B94A8;
+  --pc-smoke: #5A6273;
+
+  /* Neon accents */
+  --pc-cyan: #34E7DE;
+  --pc-cyan-bright: #6BF6EE;
+  --pc-cyan-deep: #12A9A2;
+  --pc-violet: #8B5CF6;
+  --pc-violet-bright: #B098FF;
+  --pc-violet-deep: #5B34C9;
+  --pc-green: #35F5A0;
+  --pc-green-bright: #6BFFC0;
+  --pc-green-deep: #12B972;
+  --pc-indigo: #4B44E8;
+  --pc-blue: #2E7BFF;
+  --pc-magenta: #E8459A;
+
+  /* Gradients / auras */
+  --pc-grad-aura: linear-gradient(120deg, var(--pc-cyan) 0%, var(--pc-violet) 55%, var(--pc-green) 100%);
+  --pc-grad-afterlight: linear-gradient(180deg, var(--pc-violet-bright) 0%, var(--pc-violet) 45%, var(--pc-cyan) 100%);
+  --pc-grad-nebula: radial-gradient(120% 120% at 50% 0%, rgba(139,92,246,0.35) 0%, rgba(52,231,222,0.12) 40%, rgba(5,6,10,0) 72%);
+  --pc-grad-sheen: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0) 100%);
+
+  /* Semantic aliases */
+  --accent: var(--pc-cyan);
+  --accent-2: var(--pc-violet);
+  --accent-3: var(--pc-green);
+
+  --bg-base: var(--pc-void);
+  --bg-black: var(--pc-black);
+  --surface-1: var(--pc-abyss);
+  --surface-card: var(--pc-surface);
+  --surface-raised: var(--pc-elevated);
+  --surface-glass: rgba(16,19,28,0.62);
+
+  --border: var(--pc-line);
+  --border-strong: var(--pc-line-strong);
+  --border-accent: color-mix(in oklab, var(--pc-cyan) 55%, transparent);
+
+  --text-primary: var(--pc-white);
+  --text-secondary: var(--pc-fog);
+  --text-muted: var(--pc-mist);
+  --text-faint: var(--pc-smoke);
+  --text-accent: var(--pc-cyan);
+  --text-on-accent: var(--pc-black);
+
+  --focus-ring: var(--pc-cyan);
+
+  --success: var(--pc-green);
+  --success-fg: var(--pc-green-bright);
+  --info: var(--pc-cyan);
+  --info-fg: var(--pc-cyan-bright);
+  --warning: #F5B742;
+  --warning-fg: #FFD27A;
+  --danger: #FF3B6B;
+  --danger-fg: #FF7A9C;
+
+  color-scheme: dark;
+}
+
+/* ---- Typography ------------------------------------------------------ */
+:root {
+  --font-display: 'Space Grotesk', 'Helvetica Neue', Arial, sans-serif;
+  --font-body: 'Space Grotesk', 'Helvetica Neue', Arial, sans-serif;
+  --font-techno: 'Orbitron', 'Space Grotesk', sans-serif;
+  --font-mono: 'Space Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  --fw-light: 300;
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+  --fw-black: 900;
+
+  --fs-3xs: 10px;
+  --fs-2xs: 11px;
+  --fs-xs: 12px;
+  --fs-sm: 14px;
+  --fs-base: 16px;
+  --fs-md: 18px;
+  --fs-lg: 21px;
+  --fs-xl: 26px;
+  --fs-2xl: 33px;
+  --fs-3xl: 44px;
+  --fs-4xl: 60px;
+  --fs-5xl: 80px;
+  --fs-6xl: 108px;
+
+  --lh-tight: 0.98;
+  --lh-snug: 1.12;
+  --lh-normal: 1.5;
+  --lh-relaxed: 1.7;
+
+  --ls-tightest: -0.04em;
+  --ls-tight: -0.02em;
+  --ls-normal: 0em;
+  --ls-wide: 0.04em;
+  --ls-wider: 0.12em;
+  --ls-widest: 0.28em;
+
+  --text-display: var(--fw-bold) var(--fs-6xl)/var(--lh-tight) var(--font-display);
+  --text-h1: var(--fw-bold) var(--fs-4xl)/var(--lh-snug) var(--font-display);
+  --text-h2: var(--fw-bold) var(--fs-2xl)/var(--lh-snug) var(--font-display);
+  --text-h3: var(--fw-semibold) var(--fs-xl)/var(--lh-snug) var(--font-display);
+  --text-body: var(--fw-regular) var(--fs-base)/var(--lh-normal) var(--font-body);
+  --text-caption: var(--fw-regular) var(--fs-sm)/var(--lh-normal) var(--font-body);
+  --text-eyebrow: var(--fw-regular) var(--fs-xs)/1 var(--font-mono);
+}
+
+/* ---- Spacing & layout (4px base grid) -------------------------------- */
+:root {
+  --sp-0: 0;
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+  --sp-16: 64px;
+  --sp-20: 80px;
+  --sp-24: 96px;
+  --sp-32: 128px;
+
+  --container-max: 1200px;
+  --container-wide: 1440px;
+  --gutter: 24px;
+  --section-y: 96px;
+}
+
+/* ---- Effects: radii, borders, shadows, glows, blur, motion ----------- */
+:root {
+  --r-none: 0;
+  --r-xs: 2px;
+  --r-sm: 4px;
+  --r-md: 8px;
+  --r-lg: 12px;
+  --r-xl: 18px;
+  --r-pill: 999px;
+  --r-circle: 50%;
+
+  --bw-hair: 1px;
+  --bw: 1.5px;
+  --bw-thick: 2px;
+
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.6);
+  --shadow-md: 0 6px 20px rgba(0,0,0,0.55);
+  --shadow-lg: 0 20px 60px rgba(0,0,0,0.65);
+  --shadow-inset: inset 0 1px 0 rgba(255,255,255,0.05);
+
+  --glow-cyan: 0 0 20px rgba(52,231,222,0.45), 0 0 4px rgba(52,231,222,0.7);
+  --glow-cyan-lg: 0 0 44px rgba(52,231,222,0.55), 0 0 12px rgba(52,231,222,0.8);
+  --glow-violet: 0 0 22px rgba(139,92,246,0.5), 0 0 5px rgba(139,92,246,0.75);
+  --glow-green: 0 0 20px rgba(53,245,160,0.45), 0 0 4px rgba(53,245,160,0.7);
+  --glow-text-cyan: 0 0 12px rgba(52,231,222,0.65);
+  --glow-text-violet: 0 0 14px rgba(176,152,255,0.7);
+  --glow-soft: 0 0 60px rgba(139,92,246,0.25);
+
+  --blur-sm: 6px;
+  --blur-md: 14px;
+  --blur-lg: 28px;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-glide: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --dur-fast: 120ms;
+  --dur: 200ms;
+  --dur-slow: 400ms;
+  --dur-drift: 8s;
+}
