@@ -11,7 +11,7 @@ export const site = {
   location: 'Cape Town',
   locationLong: 'Cape Town, South Africa',
   founded: '2023',
-  email: 'paracausalevents@gmail.com',
+  email: 'info@paracausal.world',
   /** Shown as typed; `phoneHref` is the same number for a tel: link. */
   phone: '+27 64 654 2006',
   phoneHref: 'tel:+27646542006',
@@ -355,7 +355,7 @@ export const navLinks = [
 
 export const socials = [
   { label: 'Instagram',        href: 'https://instagram.com/paracausal' },
-  { label: 'SoundCloud',       href: 'https://soundcloud.com/paracausal' },
+  { label: 'SoundCloud',       href: 'https://soundcloud.com/paracausalworld' },
   { label: 'Facebook',         href: 'https://facebook.com/paracausal' },
 ] as const;
 
