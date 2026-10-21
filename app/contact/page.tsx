@@ -18,7 +18,7 @@ const socials = [
   },
   {
     name: 'SoundCloud',
-    href: 'https://soundcloud.com/paracausal',
+    href: 'https://soundcloud.com/paracausalworld',
     icon: (
       <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
         <path d="M11.576 8.719c-.187 0-.37.04-.538.118V18.4h8.532c1.59 0 2.88-1.29 2.88-2.88s-1.29-2.88-2.88-2.88c-.16 0-.315.014-.466.041-.177-2.455-2.21-4.39-4.694-4.39-.278 0-.555.028-.834.078zM3.52 12.434c-.293 0-.546.126-.73.324v5.646h6.016v-5.646a1.007 1.007 0 00-1.007-1.007c-.554 0-1.007.453-1.007 1.007 0-.554-.453-1.007-1.007-1.007-.557 0-1.007.453-1.007 1.007 0-.554-.45-1.007-1.008-1.007z" />
@@ -118,10 +118,10 @@ export default function ContactPage() {
             <div>
               <p className="text-[9px] tracking-[0.4em] text-white/30 uppercase mb-3">Email</p>
               <a
-                href="mailto:paracausalevents@gmail.com"
+                href="mailto:info@paracausal.world"
                 className="text-white/70 hover:text-white transition-colors text-sm tracking-wide"
               >
-                paracausalevents@gmail.com
+                info@paracausal.world
               </a>
             </div>
 
