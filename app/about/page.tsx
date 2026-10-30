@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import PageHeader from '@/components/PageHeader';
-import { galleryPhotos, pageTitle, pageMeta } from '@/lib/site';
+import { cdn, pageTitle, pageMeta } from '@/lib/site';
 
 export const metadata: Metadata = pageMeta({
   title: pageTitle('About'),
@@ -12,9 +12,13 @@ export const metadata: Metadata = pageMeta({
 
 /* Built from "About Page v2" in the Paracausal Claude Design project
    (ui_kits/website/About Page v2.html). Its team-photo slot was an empty
-   placeholder, filled here from the gallery. The design's photo banner was
-   swapped for the centred page heading the other pages use. */
-const [, , bois] = galleryPhotos;
+   placeholder, filled here with a crew photo from the media bucket. The
+   design's photo banner was swapped for the centred page heading the other
+   pages use. The R2 key is case-sensitive: `theBoys.JPG`, not `.jpg`. */
+const teamPhoto = {
+  src: cdn('theBoys.JPG'),
+  alt: 'Three of the Paracausal crew grinning arm in arm at Origin 2026, hands thrown up under a canopy of painted psychedelic shade cloth, the dance floor busy behind them',
+};
 
 const intro = [
   'What started as a group of friends enjoying the wonders of psychedelic music, quickly grew into a key player in psytrance adoption in Cape Town.',
@@ -46,7 +50,7 @@ export default function AboutPage() {
 
       <section className="rd-page-wrap rd-page-intro" style={{ paddingTop: 56 }}>
         <div className="rd-page-photo">
-          <Image src={bois.src} alt={bois.alt} fill sizes="(max-width: 800px) 100vw, 560px" quality={90} style={{ objectFit: 'cover' }} />
+          <Image src={teamPhoto.src} alt={teamPhoto.alt} fill sizes="(max-width: 800px) 100vw, 560px" quality={90} style={{ objectFit: 'cover' }} />
         </div>
         <div>
           <h2>This is Paracausal</h2>
